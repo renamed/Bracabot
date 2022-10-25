@@ -1,4 +1,5 @@
-﻿using Bracabot2.Domain.Responses;
+﻿using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Responses;
 using Bracabot2.Services;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,16 @@ namespace Bracabot2.Commands
 {
     public class FreedomCommand : ICommand
     {
+        private readonly IDotaService dotaService;
+
+        public FreedomCommand(IDotaService dotaService)
+        {
+            this.dotaService = dotaService;
+        }
+
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaService = new DotaService();
+            
             var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
 
             IEnumerable<DotaApiRecentMatchResponse> response = await dotaService.GetRecentMatchesAsync(dotaId);

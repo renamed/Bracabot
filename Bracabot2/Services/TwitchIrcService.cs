@@ -1,12 +1,10 @@
-﻿using Bracabot2.Domain;
-using System;
-using System.IO;
+﻿using Bracabot2.Domain.Interfaces;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Bracabot2.Services
 {
-    public class TwitchIrcService : IDisposable
+    public class TwitchIrcService : IDisposable, IIrcService
     {
         public TcpClient TcpClient { get; private set; }
         public StreamReader Reader { get; private set; }
