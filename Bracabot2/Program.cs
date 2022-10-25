@@ -5,7 +5,7 @@ using Bracabot2.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 
-Config.AddEnvironmentVariables();
+            Config.AddEnvironmentVariables();
 
 IServiceCollection services = new ServiceCollection();
 services.AddSingleton<IDotaService, DotaService>()
@@ -16,6 +16,7 @@ services.AddSingleton<IDotaService, DotaService>()
             .AddSingleton<IWebApiService, WebApiService>()
             .AddSingleton(sp => sp);
 
+            await twitchIrcService.ConnectAsync();
 
 var commandType = typeof(ICommand);
 var allCommands = AppDomain.CurrentDomain.GetAssemblies()
@@ -25,7 +26,19 @@ var allCommands = AppDomain.CurrentDomain.GetAssemblies()
 foreach (var currentCommand in allCommands)
     services.AddSingleton(currentCommand);
 
+                Console.WriteLine(line);
 
+                string[] split = line.Split(" ");
+                if (line.StartsWith("PING"))
+                {
+                    Console.WriteLine("PING");
+                    await twitchIrcService.SendPongAsync(split[1]);
+                }
+                else if (line.Contains("PRIVMSG"))
+                {
+                    var tokens = line.Split(":", StringSplitOptions.RemoveEmptyEntries);
+                    var comandos = tokens.Last().Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                    if (!comandos.Any()) continue;
 
 var serviceProvider = services.BuildServiceProvider();
 

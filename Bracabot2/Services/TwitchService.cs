@@ -11,7 +11,7 @@ namespace Bracabot2.Services
         private readonly IWebApiService webApiService;
 
         public TwitchService(IWebApiService webApiService)
-        {
+    {
             this.webApiService = webApiService;
         }
 

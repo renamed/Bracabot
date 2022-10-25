@@ -1,5 +1,6 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Bracabot2.Services
 {

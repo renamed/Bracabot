@@ -27,10 +27,11 @@ namespace Bracabot2.Services
         }
 
         private async Task InitializeConsts()
-        {
-            idToNameHeroes = new Dictionary<string, string>(JsonSerializer.Deserialize<Dictionary<string, string>>(await File.ReadAllTextAsync("hero_from_id.json")), StringComparer.CurrentCultureIgnoreCase);
-            nameToIdHeroes = new Dictionary<string, int>(JsonSerializer.Deserialize<Dictionary<string, int>>(await File.ReadAllTextAsync("hero_from_name.json")), StringComparer.CurrentCultureIgnoreCase);
-            idMedals = JsonSerializer.Deserialize<Dictionary<int, string>>(await File.ReadAllTextAsync("id_medals.json"));
+            {
+                idToNameHeroes = new Dictionary<string, string>(JsonSerializer.Deserialize<Dictionary<string, string>>(await File.ReadAllTextAsync("hero_from_id.json")), StringComparer.CurrentCultureIgnoreCase);
+                nameToIdHeroes = new Dictionary<string, int>(JsonSerializer.Deserialize<Dictionary<string, int>>(await File.ReadAllTextAsync("hero_from_name.json")), StringComparer.CurrentCultureIgnoreCase);
+                idMedals = JsonSerializer.Deserialize<Dictionary<int, string>>(await File.ReadAllTextAsync("id_medals.json"));
+            }
         }
 
         public async Task<DotaApiPlayerResponse> GetPlayerAsync(string dotaId)

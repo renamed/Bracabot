@@ -1,6 +1,11 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
+using Bracabot2.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {
@@ -17,6 +22,9 @@ namespace Bracabot2.Commands
 
         public async Task<string> ExecuteAsync(string[] args)
         {
+            var dotaService = new DotaService();
+            var twitchService = new TwitchService();
+
             if (!await twitchService.EhOJogoDeDota())
             {
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
