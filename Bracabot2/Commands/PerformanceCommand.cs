@@ -22,8 +22,6 @@ namespace Bracabot2.Commands
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaService = new DotaService();
-            var twitchService = new TwitchService();
             var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
 
             if (!await twitchService.EhOJogoDeDota())
