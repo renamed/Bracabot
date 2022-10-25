@@ -1,4 +1,5 @@
-﻿using Bracabot2.Domain.Responses;
+﻿using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Responses;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,20 +9,28 @@ using System.Threading.Tasks;
 
 namespace Bracabot2.Services
 {
-    public class DotaService : WebApiServiceBase
+    public class DotaService : IDotaService
     {
-        private static Dictionary<string, string> idToNameHeroes;
-        private static Dictionary<string, int> nameToIdHeroes;
-        private static Dictionary<int, string> idMedals;
+        private Dictionary<string, string> idToNameHeroes;
+        private Dictionary<string, int> nameToIdHeroes;
+        private Dictionary<int, string> idMedals;
 
-        private static async Task InitializeConsts()
+        private readonly IWebApiService webApiService;
+
+        public DotaService(IWebApiService webApiService)
         {
-            if (idToNameHeroes is null || nameToIdHeroes is null || idMedals is null)
-            {
-                idToNameHeroes = new Dictionary<string, string>(JsonSerializer.Deserialize<Dictionary<string, string>>(await File.ReadAllTextAsync("hero_from_id.json")), StringComparer.CurrentCultureIgnoreCase);
-                nameToIdHeroes = new Dictionary<string, int>(JsonSerializer.Deserialize<Dictionary<string, int>>(await File.ReadAllTextAsync("hero_from_name.json")), StringComparer.CurrentCultureIgnoreCase);
-                idMedals = JsonSerializer.Deserialize<Dictionary<int, string>>(await File.ReadAllTextAsync("id_medals.json"));
-            }
+            this.webApiService = webApiService;
+        }
+
+        public DotaService()
+        {
+        }
+
+        private async Task InitializeConsts()
+        {
+            idToNameHeroes = new Dictionary<string, string>(JsonSerializer.Deserialize<Dictionary<string, string>>(await File.ReadAllTextAsync("hero_from_id.json")), StringComparer.CurrentCultureIgnoreCase);
+            nameToIdHeroes = new Dictionary<string, int>(JsonSerializer.Deserialize<Dictionary<string, int>>(await File.ReadAllTextAsync("hero_from_name.json")), StringComparer.CurrentCultureIgnoreCase);
+            idMedals = JsonSerializer.Deserialize<Dictionary<int, string>>(await File.ReadAllTextAsync("id_medals.json"));
         }
 
         public async Task<DotaApiPlayerResponse> GetPlayerAsync(string dotaId)
@@ -73,7 +82,7 @@ namespace Bracabot2.Services
 
         private async Task<T> CallDotaApiAsync<T>(string suffix)
         {
-            return await CallApiAsync<T>($"https://api.opendota.com/api{suffix}");
+            return await webApiService.CallApiAsync<T>($"https://api.opendota.com/api{suffix}");
         }
     }
 }

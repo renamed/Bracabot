@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Bracabot2.Domain.Interfaces;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Bracabot2.Services
-{
-    public abstract class WebApiServiceBase
+{    
+    public class WebApiService : IWebApiService
     {
-        protected async Task<string> GetApiResponse(string url, IDictionary<string, string> headers = default)
+        private async Task<string> GetApiResponse(string url, IDictionary<string, string> headers = default)
         {
             using var cliente = new HttpClient();
 
@@ -24,7 +25,7 @@ namespace Bracabot2.Services
                 : default;
         }
 
-        protected async Task<T> CallApiAsync<T>(string url, IDictionary<string, string> headers = default)
+        public async Task<T> CallApiAsync<T>(string url, IDictionary<string, string> headers = default)
         {
             return JsonSerializer.Deserialize<T>(await GetApiResponse(url, headers));
         }

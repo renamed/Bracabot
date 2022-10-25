@@ -1,4 +1,5 @@
-﻿using Bracabot2.Domain.Responses;
+﻿using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Responses;
 using Bracabot2.Services;
 using System;
 using System.Linq;
@@ -9,10 +10,18 @@ namespace Bracabot2.Commands
 {
     public class HeroCommand : ICommand
     {
+        private readonly IDotaService dotaService;
+        private readonly ITwitchService twitchService;
+
+        public HeroCommand(IDotaService dotaService, ITwitchService twitchService)
+        {
+            this.dotaService = dotaService;
+            this.twitchService = twitchService;
+        }
+
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaService = new DotaService();
-            var twitchService = new TwitchService();
+            
             var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
 
             if (!await twitchService.EhOJogoDeDota())

@@ -1,12 +1,20 @@
-﻿using Bracabot2.Domain.Responses;
+﻿using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Responses;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Bracabot2.Services
 {
-    public class TwitchService : WebApiServiceBase
+    public class TwitchService : ITwitchService
     {
+        private readonly IWebApiService webApiService;
+
+        public TwitchService(IWebApiService webApiService)
+        {
+            this.webApiService = webApiService;
+        }
+
         public async Task<TwitchApiChannelInfoResponse> GetChannelInfo()
         {
             var twitchBroadcastId = Environment.GetEnvironmentVariable("TWITCH_BROADCAST_ID");
@@ -28,7 +36,7 @@ namespace Bracabot2.Services
                 {"Authorization", $"Bearer {Environment.GetEnvironmentVariable("AUTHORIZATION_TWITCH")}" },
             };
 
-            return await CallApiAsync<T>($"https://api.twitch.tv/helix{suffix}", headers);            
+            return await webApiService.CallApiAsync<T>($"https://api.twitch.tv/helix{suffix}", headers);            
         }
     }
 }

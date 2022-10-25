@@ -1,4 +1,5 @@
-﻿using Bracabot2.Domain.Responses;
+﻿using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Responses;
 using Bracabot2.Services;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,17 @@ namespace Bracabot2.Commands
 {
     public class PerformanceCommand : ICommand
     {
+        private readonly IDotaService dotaService;
+        private readonly ITwitchService twitchService;
+
+        public PerformanceCommand(IDotaService dotaService, ITwitchService twitchService)
+        {
+            this.dotaService = dotaService;
+            this.twitchService = twitchService;
+        }
+
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaService = new DotaService();
-            var twitchService = new TwitchService();
             var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
 
             if (!await twitchService.EhOJogoDeDota())
@@ -57,7 +65,7 @@ namespace Bracabot2.Commands
             IEnumerable<IGrouping<int, DotaApiRecentMatchResponse>> heroIdMaisJogado = eligibleMatches.GroupBy(x => x.HeroId);
             IGrouping<int, DotaApiRecentMatchResponse> qtd = heroIdMaisJogado.OrderByDescending(x => x.Count()).First();
 
-            var nomeHeroMaisJogado = dotaService.GetNameAsync(qtd.Key.ToString());
+            var nomeHeroMaisJogado = await dotaService.GetNameAsync(qtd.Key.ToString());
 
             sb.Append($" --- {heroIdMaisJogado.Count()} heroi(s) único(s) --- Heroi mais jogado: {nomeHeroMaisJogado} com {qtd.Count()} vez(es) ({1.0 * qtd.Count() / qtdJogos:P1}).");
 

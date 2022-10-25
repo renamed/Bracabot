@@ -1,46 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Bracabot2.Commands
 {
-    public static class CommandFactory
+    public class CommandFactory
     {
-        private static IDictionary<string, ICommand> _commands = new Dictionary<string, ICommand>(StringComparer.OrdinalIgnoreCase)
+        private readonly IDictionary<string, ICommand> commands;
+
+        public CommandFactory(IServiceProvider serviceProvider)
         {
-            { "!comandos", new CommandsCommand() },
-            { "!commands", new CommandsCommand() },
-            { "!commandos",new CommandsCommand() },
-            { "!comands",  new CommandsCommand() },
+            commands = new Dictionary<string, ICommand>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "!comandos",  serviceProvider.GetService<CommandsCommand>() },
+                { "!commands",  serviceProvider.GetService<CommandsCommand>() },
+                { "!commandos", serviceProvider.GetService<CommandsCommand>() },
+                { "!comands",   serviceProvider.GetService<CommandsCommand>() },
 
-            { "!liberdade",  new FreedomCommand() },
+                { "!liberdade", serviceProvider.GetService<FreedomCommand>() },
 
-            { "!aproveitamento", new PerformanceCommand() },
+                { "!aproveitamento", serviceProvider.GetService<PerformanceCommand>() },
 
-            { "!recalibrar", new RecalibrationCommand() },
-            { "!recalibracao", new RecalibrationCommand() },
-            { "!recalibração", new RecalibrationCommand() },
-            { "!recal", new RecalibrationCommand() },
+                { "!recalibrar"  , serviceProvider.GetService<RecalibrationCommand>() },
+                { "!recalibracao", serviceProvider.GetService<RecalibrationCommand>() },
+                { "!recalibração", serviceProvider.GetService<RecalibrationCommand>() },
+                { "!recal"       , serviceProvider.GetService<RecalibrationCommand>() },
 
-            { "!placar", new ScoreCommand() },
-            { "!wl", new ScoreCommand() },
-            { "!score", new ScoreCommand() },
+                { "!placar", serviceProvider.GetService<ScoreCommand>() },
+                { "!wl",     serviceProvider.GetService<ScoreCommand>() },
+                { "!score",  serviceProvider.GetService<ScoreCommand>() },
 
-            { "!heroi", new HeroCommand() },
-            { "!herói", new HeroCommand() },
-            { "!hero", new HeroCommand() },
+                { "!heroi", serviceProvider.GetService<HeroCommand>() },
+                { "!herói", serviceProvider.GetService<HeroCommand>() },
+                { "!hero",  serviceProvider.GetService<HeroCommand>() },
 
-            { "!medalha" , new MedalCommand() },
-            {"!medal", new MedalCommand()},
-            {"!mmr", new MedalCommand()},
+                { "!medalha" ,  serviceProvider.GetService<MedalCommand>() },
+                {"!medal",      serviceProvider.GetService<MedalCommand>()},
+                {"!mmr",        serviceProvider.GetService<MedalCommand>()},
 
-            {"!tai", new PingCommand() },
+                {"!tai", serviceProvider.GetService<PingCommand>() },
 
-            {"!histograma", new HistogramCommand() }
-        };
+                {"!histograma", serviceProvider.GetService<HistogramCommand>() }
+            };
+        }
 
-        public static ICommand Get(string name)
+        public ICommand? Get(string name)
         {
-            _ = _commands.TryGetValue(name, out var command);
+            _ = commands.TryGetValue(name, out var command);
             return command;
         }
     }
