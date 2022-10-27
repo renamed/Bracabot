@@ -1,5 +1,6 @@
 ﻿using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
+using Serilog;
 
 namespace Bracabot2.Services
 {
@@ -8,10 +9,12 @@ namespace Bracabot2.Services
         public volatile bool ShouldStop;
 
         private readonly CommandFactory commandFactory;
+        private readonly ILogger logger;
 
         public TwitchFacade(CommandFactory commandFactory)
         {
             this.commandFactory = commandFactory;
+            logger = Log.ForContext<TwitchFacade>();
         }
 
         public async Task RunBotAsync()
@@ -26,12 +29,12 @@ namespace Bracabot2.Services
                 string line = await twitchIrcService.GetMessageAsync();
                 if (line == null) continue;
 
-                Console.WriteLine(line);
+                logger.Information(line);
 
                 string[] split = line.Split(" ");
                 if (line.StartsWith("PING"))
                 {
-                    Console.WriteLine("PING");
+                    logger.Information("PING");
                     await twitchIrcService.SendPongAsync(split[1]);
                 }
                 else if (line.Contains("PRIVMSG"))
