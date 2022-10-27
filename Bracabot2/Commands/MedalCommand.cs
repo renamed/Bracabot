@@ -1,10 +1,4 @@
 ﻿using Bracabot2.Domain.Interfaces;
-using Bracabot2.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {
@@ -35,17 +29,20 @@ namespace Bracabot2.Commands
             if (medal == null)
             {
                 return "Deu bug, não encontrei a medalha informada pela Valve =/";
-            }
+            }            
 
             if (slot == 8)
             {
-                return $"{medal} - {player.RankTier}";
+                return $"{medal} rank {player.LeaderboardRank}";
             }
-            else
+
+            if (player.LeaderboardRank != null)
             {
-                int stars = player.RankTier % 10;
-                return $"{medal} {stars}";
+                return $"Rank {player.LeaderboardRank}";
             }
+            
+            int stars = player.RankTier % 10;
+            return $"{medal} {stars}";
         }
     }
 }

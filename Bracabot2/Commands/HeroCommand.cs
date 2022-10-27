@@ -1,10 +1,7 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
-using Bracabot2.Services;
-using System;
-using System.Linq;
+using Bracabot2.Domain.Support;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {
@@ -29,7 +26,7 @@ namespace Bracabot2.Commands
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }
 
-            if (!args.Any())
+            if (args == null || !args.Any())
             {
                 return "Informe um herói para que eu possa lhe mostrar algumas estatísticas. Por exemplo, !heroi aa";
             }
@@ -48,6 +45,11 @@ namespace Bracabot2.Commands
             }
 
             var localizedName = await dotaService.GetNameAsync(idHero);
+            if (localizedName == default)
+            {
+                return "Achei um bug e não consigo mostrar as estatísticas do hero";
+            }
+
             var sb = WriteHeroMessage(hero, localizedName);
 
             return sb.ToString();
@@ -148,11 +150,11 @@ namespace Bracabot2.Commands
             if (hero.Games != 0)
             {
                 var lastPlayed = DateTimeOffset.FromUnixTimeSeconds(hero.LastPlayed);
-                var lastPlayedBrasilia = TimeZoneInfo.ConvertTimeFromUtc(lastPlayed.DateTime, TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"));
+                var lastPlayedBrasilia = TimeZoneInfo.ConvertTimeFromUtc(lastPlayed.DateTime, TimeZoneInfoExtension.GetBrasiliaTimeZone());
                 sb.Append($"O último jogo com o heroi foi em {lastPlayedBrasilia:dd/MM/yyyy à\\s HH:mm:ss}.");
             }
 
-            return sb.ToString();
+            return sb.ToString().Trim();
         }
     }
 }

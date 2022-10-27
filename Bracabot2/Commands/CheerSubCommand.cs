@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Bracabot2.Commands
+﻿namespace Bracabot2.Commands
 {
     public class CheerSubCommand : ICommand
     {
         private static DateTime ultimoToca = DateTime.MinValue;
 
-        public async Task<string> ExecuteAsync(string[] args)
+        public Task<string> ExecuteAsync(string[] args)
         {
-            //if (!line.Contains("mod=1"))
-            //{
             var diff = DateTime.UtcNow - ultimoToca;
             if (diff <= TimeSpan.FromMinutes(2))
             {
@@ -33,11 +24,11 @@ namespace Bracabot2.Commands
                     tempo = $"{diffRestante:mm} minuto e {diffRestante:ss} segundo(s)";
                 }
 
-                return "Aguarde mais {tempo} para usar o comando !toca";
+                return Task.FromResult($"Aguarde mais {tempo} para usar o comando !toca");
             }
 
             ultimoToca = DateTime.UtcNow;
-            return "!kappagen bracubiTrombeta ";
+            return Task.FromResult("!kappagen bracubiTrombeta ");
         }
     }
 }
