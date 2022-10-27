@@ -28,5 +28,5 @@ build-project:
 unit-tests:
   stage: test
   script:
-    - 'dotnet test'
+    - 'dotnet test Bracabot.UnitTests/Bracabot.UnitTests.csproj --no-restore'
 
