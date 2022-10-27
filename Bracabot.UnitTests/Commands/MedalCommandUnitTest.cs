@@ -25,7 +25,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNotPlayingDota2()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(false);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
             var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object);
 
             // Act
@@ -39,7 +39,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenMedalReturnsNull()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetMedalAsync(It.IsAny<int>())).ReturnsAsync((string)null);
             dotaService.Setup(s => s.GetPlayerAsync(It.IsAny<string>())).ReturnsAsync(new DotaApiPlayerResponse
             {
@@ -58,7 +58,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnMessage_WhenMedalIsNotImmortal()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetMedalAsync(It.IsAny<int>())).ReturnsAsync("Medalha");
             dotaService.Setup(s => s.GetPlayerAsync(It.IsAny<string>())).ReturnsAsync(new DotaApiPlayerResponse
             {
@@ -77,7 +77,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnMessage_WhenMedalIsImmortal()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetMedalAsync(It.IsAny<int>())).ReturnsAsync("Imorrível");
             dotaService.Setup(s => s.GetPlayerAsync(It.IsAny<string>())).ReturnsAsync(new DotaApiPlayerResponse
             {
@@ -97,7 +97,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnMessage_WhenMedalIsNotImmortalButRanktier()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetMedalAsync(It.IsAny<int>())).ReturnsAsync("Xaxa");
             dotaService.Setup(s => s.GetPlayerAsync(It.IsAny<string>())).ReturnsAsync(new DotaApiPlayerResponse
             {

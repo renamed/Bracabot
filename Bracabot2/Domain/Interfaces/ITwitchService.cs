@@ -5,7 +5,7 @@ namespace Bracabot2.Domain.Interfaces
 {
     public interface ITwitchService
     {
-        Task<bool> EhOJogoDeDota();
+        Task<bool> IsCurrentGameDota2();
         Task<TwitchApiChannelInfoResponse> GetChannelInfo();
     }
 }

@@ -26,7 +26,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNotPlayingDota2()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(false);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
             var histogramCommand = new HistogramCommand(dotaService.Object, twitchService.Object);
 
             // Act
@@ -40,7 +40,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenArgsIsNull()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             var histogramCommand = new HistogramCommand(dotaService.Object, twitchService.Object);
 
             // Act
@@ -54,7 +54,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNoHeroNameIsNotInformed()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             var histogramCommand = new HistogramCommand(dotaService.Object, twitchService.Object);
             var args = Enumerable.Empty<string>().ToArray();
 
@@ -69,7 +69,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenMMRIsNotNumeric()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             var histogramCommand = new HistogramCommand(dotaService.Object, twitchService.Object);
             var mmr = new string[] { "aa" };
 
@@ -84,7 +84,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenMMRIsBelowZero()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             var histogramCommand = new HistogramCommand(dotaService.Object, twitchService.Object);
             var mmr = new string[] { "-5200" };
 
@@ -100,7 +100,7 @@ namespace Bracabot.UnitTests.Commands
         {
             // Arrange
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetMmrBucketAsync()).ReturnsAsync(new DotaApiMmrBucketResponse
             {
                 Mmr = new DotaApiMmrBucketRowsResponse
@@ -147,7 +147,7 @@ namespace Bracabot.UnitTests.Commands
         {
             // Arrange
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetMmrBucketAsync()).ReturnsAsync(new DotaApiMmrBucketResponse
             {
                 Mmr = new DotaApiMmrBucketRowsResponse
