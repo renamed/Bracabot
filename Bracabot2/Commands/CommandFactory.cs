@@ -42,7 +42,7 @@ namespace Bracabot2.Commands
             };
         }
 
-        public ICommand? Get(string name)
+        public ICommand Get(string name)
         {
             _ = commands.TryGetValue(name, out var command);
             return command;

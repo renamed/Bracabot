@@ -22,14 +22,14 @@ namespace Bracabot2.Commands
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }
 
-            if (!args.Any())
+            if (args == null || !args.Any())
             {
                 return "Use !histograma SEU_MMR para saber como você se compara aos demais players de MMR. Ex: !histograma 3200";
             }
 
             if (!int.TryParse(args.First(), out int mmr))
             {
-                return "{args.First()} não parece um valor de MMR válido. Use !histograma SEU_MMR para saber como você se compara aos demais players de MMR. Ex: !histograma 3200";
+                return $"{args.First()} não parece um valor de MMR válido. Use !histograma SEU_MMR para saber como você se compara aos demais players de MMR. Ex: !histograma 3200";
             }
 
             if (mmr < 0)

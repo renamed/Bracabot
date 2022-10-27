@@ -2,6 +2,7 @@ image: mcr.microsoft.com/dotnet/sdk:latest
 
 stages:
   - build
+  - test
 
 variables:
   OBJECTS_DIRECTORY: 'obj'
@@ -23,3 +24,9 @@ build-project:
   stage: build
   script:
     - 'dotnet build --no-restore'
+
+unit-tests:
+  stage: test
+  script:
+    - 'dotnet test'
+

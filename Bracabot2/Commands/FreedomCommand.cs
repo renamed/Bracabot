@@ -1,5 +1,6 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
+using Bracabot2.Domain.Support;
 using System.Text;
 
 namespace Bracabot2.Commands
@@ -14,8 +15,7 @@ namespace Bracabot2.Commands
         }
 
         public async Task<string> ExecuteAsync(string[] args)
-        {
-            
+        {            
             var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
 
             IEnumerable<DotaApiRecentMatchResponse> response = await dotaService.GetRecentMatchesAsync(dotaId);
@@ -23,24 +23,12 @@ namespace Bracabot2.Commands
                 return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";
 
             var freedomTime = DateTime.UtcNow - response.FirstOrDefault().EndTime;
-            var sb = new StringBuilder("Estamos há");
-            if (freedomTime.TotalDays >= 7)
-            {
-                sb.Append($" {Convert.ToInt32(freedomTime.TotalDays / 7)} semanas,");
-            }
-            if (freedomTime.Days >= 1)
-            {
-                sb.Append($" {freedomTime.Days} dia(s),");
-            }
-            if (freedomTime.Hours >= 1)
-            {
-                sb.Append($" {freedomTime.Hours} hora(s),");
-            }
-            if (freedomTime.Minutes >= 1)
-            {
-                sb.Append($" {freedomTime.Minutes} minuto(s),");
-            }
-            sb.Append($" {freedomTime.Seconds} segundo(s) sem o jogo de Dota bracubiClap");
+
+
+            var sb = new StringBuilder("Estamos há ");
+            sb.Append(freedomTime.GetReadable());
+            sb.Append($" sem o jogo de Dota bracubiClap");
+
             return sb.ToString();
         }
     }

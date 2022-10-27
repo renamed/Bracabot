@@ -1,4 +1,5 @@
-﻿using Bracabot2.Domain.Interfaces;
+﻿using Bracabot2.Domain.Games.Dota2;
+using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
 using Bracabot2.Services;
 using System;
@@ -61,40 +62,15 @@ namespace Bracabot2.Commands
                 return "Não achei partidas recentes";
             }
 
-            int qtdJogos = eligibleMatches.Count();
-            if (qtdJogos == 0)
+            var statistics = new Dota2Statistics(eligibleMatches);
+            if (statistics.HasError)
             {
-                return "Não achei partidas recentes";
+                return statistics.ErrorDescription;
             }
-
-            int qtdVitoriasSolo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            int qtdVitoriasGrupo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
-
-            int qtdDerrotasSolo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            int qtdDerrotasGrupo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
-
-            int qtdVitorias = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)));
-            int qtdDerrotas = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)));
-
-            //int qtdVitoriasRecalibracao = recalibracaoMatches.Where(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin))).Count();
-            //int qtdDerrotasRecalibracao = recalibracaoMatches.Where(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin))).Count();
-            //int qtdRecalibracao = qtdVitoriasRecalibracao + qtdDerrotasRecalibracao;
-
-            int mmr = 30 * qtdVitoriasSolo - 30 * qtdDerrotasSolo + 20 * qtdVitoriasGrupo - 20 * qtdDerrotasGrupo;
-
-            if (qtdVitorias + qtdDerrotas != qtdJogos)
-            {
-                Console.WriteLine($"Jogos {qtdJogos} = V {qtdVitorias} = D {qtdDerrotas}");
-                return "As contas do Renamede não estão corretas, avisa pra ele!";
-            }
-
+                        
             var sb = new StringBuilder();
-            sb.Append($"J = {qtdJogos} --- V -> {(qtdVitorias != 0 ? qtdVitorias.ToString() : "Nenhuma")} --- D -> {(qtdDerrotas != 0 ? qtdDerrotas.ToString() : "Nenhuma")} ");
-            sb.Append($"--- Saldo {mmr:+#;-#;0}");
-            //if (qtdRecalibracao != 0)
-            //{
-            //    sb.Append($" --- RECALIBRAÇÃO ==> V -> {(qtdVitoriasRecalibracao != 0 ? qtdVitoriasRecalibracao.ToString() : "Nenhuma")} -- D -> {(qtdDerrotasRecalibracao != 0 ? qtdDerrotasRecalibracao.ToString() : "Nenhuma")}");
-            //}
+            sb.Append($"J = {statistics.Games} --- V -> {(statistics.Victories != 0 ? statistics.Victories.ToString() : "Nenhuma")} --- D -> {(statistics.Defeats != 0 ? statistics.Defeats.ToString() : "Nenhuma")} ");
+            sb.Append($"--- Saldo {statistics.Mmr:+#;-#;0}");
 
             return sb.ToString();
         }
