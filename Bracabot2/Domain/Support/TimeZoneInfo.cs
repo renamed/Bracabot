@@ -4,9 +4,7 @@
     {
         public static TimeZoneInfo GetBrasiliaTimeZone()
         {
-            return OperatingSystem.IsWindows()
-                ? TimeZoneInfo.FindSystemTimeZoneById("Brasilia")
-                : TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
+            return TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
         }
     }
 }
