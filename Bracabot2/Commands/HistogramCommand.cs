@@ -17,7 +17,7 @@ namespace Bracabot2.Commands
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            if (!await twitchService.EhOJogoDeDota())
+            if (!await twitchService.IsCurrentGameDota2())
             {
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }

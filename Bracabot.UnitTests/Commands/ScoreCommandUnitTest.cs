@@ -24,7 +24,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenGameIsNotDota2()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(false);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
             var scoreCommand = new ScoreCommand(dotaService.Object, twitchService.Object);
 
             // Act
@@ -38,7 +38,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenGetRecentMatchesAsyncReturnsError()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetRecentMatchesAsync(It.IsAny<string>())).ReturnsAsync((IEnumerable<DotaApiRecentMatchResponse>) null);
             var scoreCommand = new ScoreCommand(dotaService.Object, twitchService.Object);
 
@@ -53,7 +53,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenAllMatchesAreBefore5HoursAgo()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetRecentMatchesAsync(It.IsAny<string>())).ReturnsAsync(new[]
             {
                 new DotaApiRecentMatchResponse
@@ -79,7 +79,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnMessage_WhenAllMatchesAreBefore5HoursAgo()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetRecentMatchesAsync(It.IsAny<string>())).ReturnsAsync(new[]
             {
                 new DotaApiRecentMatchResponse

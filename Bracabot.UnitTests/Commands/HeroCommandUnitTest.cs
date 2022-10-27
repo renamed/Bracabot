@@ -26,7 +26,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNotPlayingDota2()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(false);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
 
             // Act
@@ -40,7 +40,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenArgsIsNull()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
 
             // Act
@@ -54,7 +54,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNoHeroNameIsNotInformed()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
             var args = Enumerable.Empty<string>().ToArray();
 
@@ -69,7 +69,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNoHeroNameIsUnknown()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync((string)null);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
             
@@ -84,7 +84,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenDotaApiReturnsError()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((DotaApiHeroResponse)null);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
@@ -100,7 +100,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenDotaApiReturnsError2()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync((string)null);
@@ -117,7 +117,7 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnMessage_WhenEverythingWorrksFine()
         {
             // Arrange
-            twitchService.Setup(s => s.EhOJogoDeDota()).ReturnsAsync(true);
+            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync("Hero");

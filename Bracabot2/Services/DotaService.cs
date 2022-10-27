@@ -82,7 +82,7 @@ namespace Bracabot2.Services
 
         private async Task<T> CallDotaApiAsync<T>(string suffix)
         {
-            return await webApiService.CallApiAsync<T>($"https://api.opendota.com/api{suffix}");
+            return await webApiService.GetAsync<T>($"https://api.opendota.com/api{suffix}");
         }
     }
 }
