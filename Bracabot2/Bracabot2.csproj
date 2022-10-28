@@ -16,21 +16,12 @@
 
 
 	<ItemGroup>
-		<None Update="appsettings.json">
+		<None Update="appsettings.Development.json">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="heroes.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="hero_from_id.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="hero_from_name.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="id_medals.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
+		<None Update="appsettings.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>		
 		<None Update="params.env">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

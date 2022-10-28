@@ -56,6 +56,8 @@ using IHost host = Host.CreateDefaultBuilder(args)
         IConfigurationRoot configurationRoot = configuration.Build();
 
         services.Configure<SettingsOptions>(configurationRoot.GetSection("Settings"));
+
+
     })
     .Build();
 
