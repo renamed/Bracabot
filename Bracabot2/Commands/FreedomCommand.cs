@@ -1,6 +1,7 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using System.Text;
 
 namespace Bracabot2.Commands
@@ -8,15 +9,18 @@ namespace Bracabot2.Commands
     public class FreedomCommand : ICommand
     {
         private readonly IDotaService dotaService;
+        private SettingsOptions options;
 
-        public FreedomCommand(IDotaService dotaService)
+        public FreedomCommand(IDotaService dotaService,
+            IOptions<SettingsOptions> options)
         {
             this.dotaService = dotaService;
+            this.options = options.Value;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {            
-            var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
+            var dotaId = options.DotaId;
 
             IEnumerable<DotaApiRecentMatchResponse> response = await dotaService.GetRecentMatchesAsync(dotaId);
             if (response == default)            

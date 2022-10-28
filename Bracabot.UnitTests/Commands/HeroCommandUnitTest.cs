@@ -1,6 +1,8 @@
 ﻿using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using Moq;
 using System;
 using System.Globalization;
@@ -14,12 +16,17 @@ namespace Bracabot.UnitTests.Commands
     {
         private readonly Mock<IDotaService> dotaService;
         private readonly Mock<ITwitchService> twitchService;
+        private readonly IOptions<SettingsOptions> options;
         private readonly string[] HeroNameArg = new string[] { "aa" };
 
         public HeroCommandUnitTest()
         {
             dotaService = new Mock<IDotaService>();
             twitchService = new Mock<ITwitchService>();
+            options = Options.Create(new SettingsOptions
+            {
+                ChannelName = "XXX"
+            });
         }
         #region ExecuteAsync
         [Fact]
@@ -27,7 +34,7 @@ namespace Bracabot.UnitTests.Commands
         {
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
-            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await heroCommand.ExecuteAsync(HeroNameArg);
@@ -41,7 +48,7 @@ namespace Bracabot.UnitTests.Commands
         {
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
-            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await heroCommand.ExecuteAsync(null);
@@ -55,7 +62,7 @@ namespace Bracabot.UnitTests.Commands
         {
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
-            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
             var args = Enumerable.Empty<string>().ToArray();
 
             // Act
@@ -71,7 +78,7 @@ namespace Bracabot.UnitTests.Commands
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync((string)null);
-            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
             
             // Act
             var result = await heroCommand.ExecuteAsync(HeroNameArg);
@@ -87,7 +94,7 @@ namespace Bracabot.UnitTests.Commands
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((DotaApiHeroResponse)null);
-            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await heroCommand.ExecuteAsync(HeroNameArg);
@@ -104,7 +111,7 @@ namespace Bracabot.UnitTests.Commands
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync((string)null);
-            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await heroCommand.ExecuteAsync(HeroNameArg);
@@ -121,8 +128,7 @@ namespace Bracabot.UnitTests.Commands
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync("Hero");
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
-            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object);
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await heroCommand.ExecuteAsync(HeroNameArg);
@@ -136,12 +142,12 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenNeverPlayedAndNoAlliesAndNoEnemies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             var dotaApiResponse = new DotaApiHeroResponse();
             var localizedName = "Hero";
-
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
+            
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, nunca jogou com Hero. Como oponente, nunca jogou contra Hero.", result);
@@ -151,16 +157,16 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedOnceAndLostAndNoAlliesAndNoEnemies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             var dotaApiResponse = new DotaApiHeroResponse
             {
                 Games = 1,
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX já jogou com Hero uma única vez e perdeu. Como aliado, nunca jogou com Hero. Como oponente, nunca jogou contra Hero. O último jogo com o heroi foi em 26/10/2022 às 12:00:00.", result);
@@ -170,7 +176,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedOnceAndWonAndNoAlliesAndNoEnemies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             var dotaApiResponse = new DotaApiHeroResponse
             {
                 Games = 1,
@@ -178,9 +183,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX já jogou com Hero uma única vez e ganhou. Como aliado, nunca jogou com Hero. Como oponente, nunca jogou contra Hero. O último jogo com o heroi foi em 26/10/2022 às 12:00:00.", result);
@@ -190,7 +196,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedMoreThanOneTimeAndLostAndNoAlliesAndNoEnemies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             var dotaApiResponse = new DotaApiHeroResponse
             {
                 Games = 2,
@@ -198,9 +203,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX já jogou com Hero 2 vezes e perdeu todas. Como aliado, nunca jogou com Hero. Como oponente, nunca jogou contra Hero. O último jogo com o heroi foi em 26/10/2022 às 12:00:00.", result);
@@ -210,7 +216,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedMoreThanOneTimeAndOneVictoryAndNoAlliesAndNoEnemies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -219,9 +224,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX já jogou com Hero 2 vezes com apenas uma vitória (50,0%). Como aliado, nunca jogou com Hero. Como oponente, nunca jogou contra Hero. O último jogo com o heroi foi em 26/10/2022 às 12:00:00.", result);
@@ -231,7 +237,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedMoreThanOneTimeAndMoreThanOneVictoryAndNoAlliesAndNoEnemies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -240,9 +245,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX já jogou com Hero 10 vezes com 2 vitórias (20,0%). Como aliado, nunca jogou com Hero. Como oponente, nunca jogou contra Hero. O último jogo com o heroi foi em 26/10/2022 às 12:00:00.", result);
@@ -252,7 +258,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedOneTimeAndWonInAllies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -261,9 +266,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, foi um único jogo com vitória. Como oponente, nunca jogou contra Hero.", result);
@@ -273,7 +279,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedOneTimeAndLostInAllies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -282,9 +287,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, foi um único jogo com derrota. Como oponente, nunca jogou contra Hero.", result);
@@ -294,7 +300,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedMoreThanOneTimeAndWonOnceInAllies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -303,9 +308,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, foram 2 jogos com 1 vitória (50,0%). Como oponente, nunca jogou contra Hero.", result);
@@ -315,7 +321,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedMoreThanOneTimeAndWonMoreThanOnceInAllies()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -324,21 +329,19 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, foram 4 jogos com 2 vitórias (50,0%). Como oponente, nunca jogou contra Hero.", result);
         }
 
-        ////////
-        ///
         [Fact]
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedOneTimeAndWonInEnemy()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -347,9 +350,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, nunca jogou com Hero. Como oponente, foi um único jogo com vitória.", result);
@@ -359,7 +363,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedOneTimeAndLostInEnemy()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -368,9 +371,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, nunca jogou com Hero. Como oponente, foi um único jogo com derrota.", result);
@@ -380,7 +384,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedMoreThanOneTimeAndWonOnceInEnemy()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -389,9 +392,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, nunca jogou com Hero. Como oponente, foram 2 jogos com 1 vitória (50,0%).", result);
@@ -401,7 +405,6 @@ namespace Bracabot.UnitTests.Commands
         public void WriteHeroMessage_ShouldReturnMesage_WhenPlayedMoreThanOneTimeAndWonMoreThanOnceInEnemy()
         {
             // Arrange
-            Environment.SetEnvironmentVariable("CHANNEL_NAME", "XXX");
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
             var dotaApiResponse = new DotaApiHeroResponse
             {
@@ -410,9 +413,10 @@ namespace Bracabot.UnitTests.Commands
                 LastPlayed = (int)new DateTimeOffset(2022, 10, 26, 15, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds()
             };
             var localizedName = "Hero";
+            var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
-            var result = HeroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
+            var result = heroCommand.WriteHeroMessage(dotaApiResponse, localizedName);
 
             // Assert
             Assert.Equal("XXX nunca jogou com Hero. Como aliado, nunca jogou com Hero. Como oponente, foram 4 jogos com 2 vitórias (50,0%).", result);

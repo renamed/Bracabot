@@ -1,6 +1,7 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using System.Text;
 
 namespace Bracabot2.Commands
@@ -9,17 +10,19 @@ namespace Bracabot2.Commands
     {
         private readonly IDotaService dotaService;
         private readonly ITwitchService twitchService;
+        private readonly SettingsOptions options;
 
-        public HeroCommand(IDotaService dotaService, ITwitchService twitchService)
+        public HeroCommand(IDotaService dotaService, ITwitchService twitchService, IOptions<SettingsOptions> options)
         {
             this.dotaService = dotaService;
             this.twitchService = twitchService;
+            this.options = options.Value;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            
-            var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
+
+            var dotaId = options.DotaId;
 
             if (!await twitchService.IsCurrentGameDota2())
             {
@@ -55,9 +58,9 @@ namespace Bracabot2.Commands
             return sb.ToString();
         }
 
-        public static string WriteHeroMessage(DotaApiHeroResponse hero, string localizedName)
+        public string WriteHeroMessage(DotaApiHeroResponse hero, string localizedName)
         {
-            var channelName = Environment.GetEnvironmentVariable("CHANNEL_NAME");
+            var channelName = options.ChannelName;
             var sb = new StringBuilder();
             sb.Append($"{channelName} ");
             if (hero.Games == 0)

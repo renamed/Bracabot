@@ -1,6 +1,8 @@
 ﻿using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,11 +14,13 @@ namespace Bracabot.UnitTests.Commands
     {
         private readonly Mock<IDotaService> dotaService;
         private readonly Mock<ITwitchService> twitchService;
+        private readonly IOptions<SettingsOptions> options;
 
         public PerformanceCommandUnitTest()
         {
             dotaService = new Mock<IDotaService>();
             twitchService = new Mock<ITwitchService>();
+            options = Options.Create(new SettingsOptions());
         }
 
         [Fact]
@@ -24,7 +28,7 @@ namespace Bracabot.UnitTests.Commands
         {
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
-            var performanceCommand = new PerformanceCommand(dotaService.Object, twitchService.Object);
+            var performanceCommand = new PerformanceCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await performanceCommand.ExecuteAsync(null);
@@ -39,7 +43,7 @@ namespace Bracabot.UnitTests.Commands
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetRecentMatchesAsync(It.IsAny<string>())).ReturnsAsync((IEnumerable<DotaApiRecentMatchResponse>)null);
-            var performanceCommand = new PerformanceCommand(dotaService.Object, twitchService.Object);
+            var performanceCommand = new PerformanceCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await performanceCommand.ExecuteAsync(null);

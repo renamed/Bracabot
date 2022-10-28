@@ -1,21 +1,24 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 
 namespace Bracabot2.Services
 {
     public class TwitchService : ITwitchService
     {
         private readonly IWebApiService webApiService;
+        private readonly SettingsOptions options;
 
-        public TwitchService(IWebApiService webApiService)
+        public TwitchService(IWebApiService webApiService, IOptions<SettingsOptions> options)
         {
             this.webApiService = webApiService;
+            this.options = options.Value;
         }
 
         public async Task<TwitchApiChannelInfoResponse> GetChannelInfo()
         {
-            var twitchBroadcastId = Environment.GetEnvironmentVariable("TWITCH_BROADCAST_ID");
+            var twitchBroadcastId = options.TwitchBroadcastId;
             return await CallTwitchAsync<TwitchApiChannelInfoResponse>($"/channels?broadcaster_id={twitchBroadcastId}");
         }
 

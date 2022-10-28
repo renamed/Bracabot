@@ -1,6 +1,8 @@
 ﻿using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -12,10 +14,12 @@ namespace Bracabot.UnitTests.Commands
     public class FreedomCommandUnitTest
     {
         private readonly Mock<IDotaService> dotaService;
+        private readonly IOptions<SettingsOptions> options;
 
         public FreedomCommandUnitTest()
         {
             dotaService = new Mock<IDotaService>();
+            options = Options.Create(new SettingsOptions());
         }
 
         [Fact]
@@ -25,7 +29,7 @@ namespace Bracabot.UnitTests.Commands
             dotaService.Setup(x => x.GetRecentMatchesAsync(It.IsAny<string>()))
                 .ReturnsAsync((IEnumerable<DotaApiRecentMatchResponse>)null);
 
-            var freedomCommand = new FreedomCommand(dotaService.Object);
+            var freedomCommand = new FreedomCommand(dotaService.Object, options);
 
             // Act
             var response = await freedomCommand.ExecuteAsync(null);
@@ -48,7 +52,7 @@ namespace Bracabot.UnitTests.Commands
                     }
                 });
 
-            var freedomCommand = new FreedomCommand(dotaService.Object);
+            var freedomCommand = new FreedomCommand(dotaService.Object, options);
 
             // Act
             var response = await freedomCommand.ExecuteAsync(null);

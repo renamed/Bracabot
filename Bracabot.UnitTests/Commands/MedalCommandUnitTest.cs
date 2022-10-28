@@ -1,10 +1,9 @@
 ﻿using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using Moq;
-using System;
-using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -14,11 +13,13 @@ namespace Bracabot.UnitTests.Commands
     {
         private readonly Mock<IDotaService> dotaService;
         private readonly Mock<ITwitchService> twitchService;
+        private readonly IOptions<SettingsOptions> options;
 
         public MedalCommandUnitTest()
         {
             dotaService = new Mock<IDotaService>();
             twitchService = new Mock<ITwitchService>();
+            options = Options.Create(new SettingsOptions());
         }
 
         [Fact]
@@ -26,7 +27,7 @@ namespace Bracabot.UnitTests.Commands
         {
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
-            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object);
+            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await medalCommand.ExecuteAsync(null);
@@ -45,7 +46,7 @@ namespace Bracabot.UnitTests.Commands
             {
                 RankTier = 31
             });
-            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object);
+            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await medalCommand.ExecuteAsync(null);
@@ -64,7 +65,7 @@ namespace Bracabot.UnitTests.Commands
             {
                 RankTier = 31
             });
-            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object);
+            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await medalCommand.ExecuteAsync(null);
@@ -84,7 +85,7 @@ namespace Bracabot.UnitTests.Commands
                 RankTier = 80,
                 LeaderboardRank = 5
             });
-            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object);
+            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await medalCommand.ExecuteAsync(null);
@@ -104,7 +105,7 @@ namespace Bracabot.UnitTests.Commands
                 RankTier = 75,
                 LeaderboardRank = 3745
             });
-            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object);
+            var medalCommand = new MedalCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
             var result = await medalCommand.ExecuteAsync(null);
