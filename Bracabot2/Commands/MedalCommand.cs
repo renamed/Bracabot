@@ -1,4 +1,6 @@
 ﻿using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 
 namespace Bracabot2.Commands
 {
@@ -6,16 +8,18 @@ namespace Bracabot2.Commands
     {
         private readonly IDotaService dotaService;
         private readonly ITwitchService twitchService;
+        private readonly SettingsOptions options;
 
-        public MedalCommand(IDotaService dotaService, ITwitchService twitchService)
+        public MedalCommand(IDotaService dotaService, ITwitchService twitchService, IOptions<SettingsOptions> options)
         {
             this.dotaService = dotaService;
             this.twitchService = twitchService;
+            this.options = options.Value;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
+            var dotaId = options.DotaId;
 
             if (!await twitchService.IsCurrentGameDota2())
             {

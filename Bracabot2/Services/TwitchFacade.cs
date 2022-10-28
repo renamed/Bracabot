@@ -1,5 +1,7 @@
 ﻿using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Bracabot2.Services
@@ -10,17 +12,22 @@ namespace Bracabot2.Services
 
         private readonly CommandFactory commandFactory;
         private readonly ILogger logger;
+        private readonly SettingsOptions options;
+        private readonly IIrcService twitchIrcService;
 
-        public TwitchFacade(CommandFactory commandFactory)
+        public TwitchFacade(CommandFactory commandFactory
+            , IOptions<SettingsOptions> options, IIrcService twitchIrcService)
         {
             this.commandFactory = commandFactory;
+            this.options = options.Value;            
+            this.twitchIrcService = twitchIrcService;
+
             logger = Log.ForContext<TwitchFacade>();
         }
 
         public async Task RunBotAsync()
         {
-            string channelName = Environment.GetEnvironmentVariable("CHANNEL_NAME");
-            var twitchIrcService = new TwitchIrcService();
+            string channelName = options.ChannelName;
 
             await twitchIrcService.ConnectAsync();
             
