@@ -1,36 +1,19 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 
 namespace Bracabot2.Services
 {
     public class DotaService : IDotaService
     {
-        private Dictionary<string, string> idToNameHeroes;
-        private Dictionary<string, int> nameToIdHeroes;
-        private Dictionary<int, string> idMedals;
-
         private readonly IWebApiService webApiService;
+        private readonly SettingsOptions options;
 
-        public DotaService(IWebApiService webApiService)
+        public DotaService(IWebApiService webApiService, IOptions<SettingsOptions> options)
         {
             this.webApiService = webApiService;
-        }
-
-        public DotaService()
-        {
-        }
-
-        private async Task InitializeConsts()
-        {
-            idToNameHeroes = new Dictionary<string, string>(JsonSerializer.Deserialize<Dictionary<string, string>>(await File.ReadAllTextAsync("hero_from_id.json")), StringComparer.CurrentCultureIgnoreCase);
-            nameToIdHeroes = new Dictionary<string, int>(JsonSerializer.Deserialize<Dictionary<string, int>>(await File.ReadAllTextAsync("hero_from_name.json")), StringComparer.CurrentCultureIgnoreCase);
-            idMedals = JsonSerializer.Deserialize<Dictionary<int, string>>(await File.ReadAllTextAsync("id_medals.json"));
+            this.options = options.Value;
         }
 
         public async Task<DotaApiPlayerResponse> GetPlayerAsync(string dotaId)
@@ -56,28 +39,23 @@ namespace Bracabot2.Services
             return await CallDotaApiAsync<DotaApiMmrBucketResponse>("/distributions");
         }
 
-        public async Task<string> GetNameAsync(string heroId)
+        public Task<string> GetNameAsync(string heroId)
         {
-            await InitializeConsts();
-            return idToNameHeroes[heroId];
+            return Task.FromResult(options.HeroesFromId[heroId]);
         }
 
-        public async Task<string> GetIdAsync(string heroName)
+        public Task<string> GetIdAsync(string heroName)
         {
-            await InitializeConsts();
-
-            return !nameToIdHeroes.TryGetValue(heroName, out var heroId)
+            return Task.FromResult(!options.HeroesFromName.TryGetValue(heroName, out var heroId)
                 ? null
-                : heroId.ToString();
+                : heroId.ToString());
         }
 
-        public async Task<string> GetMedalAsync(int medalId)
+        public Task<string> GetMedalAsync(int medalId)
         {
-            await InitializeConsts();
-
-            return !idMedals.TryGetValue(medalId, out var medalName)
+            return Task.FromResult(!options.Medals.TryGetValue(medalId, out var medalName)
                 ? null
-                : medalName.ToString();
+                : medalName.ToString());
         }
 
         private async Task<T> CallDotaApiAsync<T>(string suffix)
