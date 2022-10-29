@@ -1,11 +1,9 @@
-﻿using Bracabot2.Domain.Interfaces;
+﻿using Bracabot2.Domain.Games.Dota2;
+using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
-using Bracabot2.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {
@@ -13,18 +11,20 @@ namespace Bracabot2.Commands
     {
         private readonly IDotaService dotaService;
         private readonly ITwitchService twitchService;
+        private readonly SettingsOptions options;
 
-        public ScoreCommand(IDotaService dotaService, ITwitchService twitchService)
+        public ScoreCommand(IDotaService dotaService, ITwitchService twitchService, IOptions<SettingsOptions> options)
         {
             this.dotaService = dotaService;
             this.twitchService = twitchService;
+            this.options = options.Value;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
+            var dotaId = options.DotaId;
 
-            if (!await twitchService.EhOJogoDeDota())
+            if (!await twitchService.IsCurrentGameDota2())
             {
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }
@@ -32,7 +32,7 @@ namespace Bracabot2.Commands
             var response = await dotaService.GetRecentMatchesAsync(dotaId);
             if (response == default)
             {
-                return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";                
+                return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";
             }
 
             var eligibleMatches = new List<DotaApiRecentMatchResponse>();
@@ -61,40 +61,15 @@ namespace Bracabot2.Commands
                 return "Não achei partidas recentes";
             }
 
-            int qtdJogos = eligibleMatches.Count();
-            if (qtdJogos == 0)
+            var statistics = new Dota2Statistics(eligibleMatches);
+            if (statistics.HasError)
             {
-                return "Não achei partidas recentes";
-            }
-
-            int qtdVitoriasSolo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            int qtdVitoriasGrupo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
-
-            int qtdDerrotasSolo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            int qtdDerrotasGrupo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
-
-            int qtdVitorias = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)));
-            int qtdDerrotas = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)));
-
-            //int qtdVitoriasRecalibracao = recalibracaoMatches.Where(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin))).Count();
-            //int qtdDerrotasRecalibracao = recalibracaoMatches.Where(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin))).Count();
-            //int qtdRecalibracao = qtdVitoriasRecalibracao + qtdDerrotasRecalibracao;
-
-            int mmr = 30 * qtdVitoriasSolo - 30 * qtdDerrotasSolo + 20 * qtdVitoriasGrupo - 20 * qtdDerrotasGrupo;
-
-            if (qtdVitorias + qtdDerrotas != qtdJogos)
-            {
-                Console.WriteLine($"Jogos {qtdJogos} = V {qtdVitorias} = D {qtdDerrotas}");
-                return "As contas do Renamede não estão corretas, avisa pra ele!";
+                return statistics.ErrorDescription;
             }
 
             var sb = new StringBuilder();
-            sb.Append($"J = {qtdJogos} --- V -> {(qtdVitorias != 0 ? qtdVitorias.ToString() : "Nenhuma")} --- D -> {(qtdDerrotas != 0 ? qtdDerrotas.ToString() : "Nenhuma")} ");
-            sb.Append($"--- Saldo {mmr:+#;-#;0}");
-            //if (qtdRecalibracao != 0)
-            //{
-            //    sb.Append($" --- RECALIBRAÇÃO ==> V -> {(qtdVitoriasRecalibracao != 0 ? qtdVitoriasRecalibracao.ToString() : "Nenhuma")} -- D -> {(qtdDerrotasRecalibracao != 0 ? qtdDerrotasRecalibracao.ToString() : "Nenhuma")}");
-            //}
+            sb.Append($"J = {statistics.Games} --- V -> {(statistics.Victories != 0 ? statistics.Victories.ToString() : "Nenhuma")} --- D -> {(statistics.Defeats != 0 ? statistics.Defeats.ToString() : "Nenhuma")} ");
+            sb.Append($"--- Saldo {statistics.Mmr:+#;-#;0}");
 
             return sb.ToString();
         }
