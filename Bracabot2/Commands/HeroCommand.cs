@@ -41,7 +41,7 @@ namespace Bracabot2.Commands
                 return $"Não conheço o herói chamado {nomeParametro}. Você digitou o nome certo?";                
             }
 
-            var hero = await dotaService.GetHeroAsync(dotaId, idHero);
+            var hero = await dotaService.GetHeroStatisticsForPlayerAsync(dotaId, idHero);
             if (hero == default)
             {
                 return "Achei um bug e não consigo mostrar as estatísticas do hero";

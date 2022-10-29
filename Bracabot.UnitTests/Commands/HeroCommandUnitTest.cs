@@ -93,7 +93,7 @@ namespace Bracabot.UnitTests.Commands
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
-            dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((DotaApiHeroResponse)null);
+            dotaService.Setup(s => s.GetHeroStatisticsForPlayerAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((DotaApiHeroResponse)null);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
@@ -109,7 +109,7 @@ namespace Bracabot.UnitTests.Commands
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
-            dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
+            dotaService.Setup(s => s.GetHeroStatisticsForPlayerAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync((string)null);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
@@ -126,7 +126,7 @@ namespace Bracabot.UnitTests.Commands
             // Arrange
             twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
-            dotaService.Setup(s => s.GetHeroAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
+            dotaService.Setup(s => s.GetHeroStatisticsForPlayerAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync("Hero");
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 

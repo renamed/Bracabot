@@ -2,33 +2,38 @@
 using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
+using Serilog;
+using System.Text.Json;
 
 namespace Bracabot2.Services
 {
     public class DotaService : IDotaService
     {
-        private readonly IWebApiService webApiService;
         private readonly SettingsOptions options;
+        private readonly HttpClient httpClient;
+        private readonly ILogger logger;
 
-        public DotaService(IWebApiService webApiService, IOptions<SettingsOptions> options)
+        public DotaService(IOptions<SettingsOptions> options, HttpClient httpClient)
         {
-            this.webApiService = webApiService;
             this.options = options.Value;
+            this.httpClient = httpClient;
+
+            logger = Log.ForContext<DotaService>();
         }
 
         public async Task<DotaApiPlayerResponse> GetPlayerAsync(string dotaId)
         {
-            return await CallDotaApiAsync<DotaApiPlayerResponse>($"/players/{dotaId}");
+            return await CallDotaApiAsync<DotaApiPlayerResponse>(string.Format(options.Apis.Dota.Players, dotaId));
         }
 
         public async Task<IEnumerable<DotaApiRecentMatchResponse>> GetRecentMatchesAsync(string dotaId)
         {
-            return await CallDotaApiAsync<IEnumerable<DotaApiRecentMatchResponse>>($"/players/{dotaId}/recentmatches");
+            return await CallDotaApiAsync<IEnumerable<DotaApiRecentMatchResponse>>(string.Format(options.Apis.Dota.RecentMatches, dotaId));
         }
 
-        public async Task<DotaApiHeroResponse> GetHeroAsync(string dotaId, string idHero)
+        public async Task<DotaApiHeroResponse> GetHeroStatisticsForPlayerAsync(string dotaId, string idHero)
         {
-            var heroes = await CallDotaApiAsync<IEnumerable<DotaApiHeroResponse>>($"/players/{dotaId}/heroes");
+            var heroes = await CallDotaApiAsync<IEnumerable<DotaApiHeroResponse>>(string.Format(options.Apis.Dota.HeroStatisticsForPlayer, dotaId));
 
             var hero = heroes.FirstOrDefault(h => h.HeroId == idHero);
             return hero?.HeroId == idHero.ToString() ? hero : default;
@@ -36,7 +41,7 @@ namespace Bracabot2.Services
 
         public async Task<DotaApiMmrBucketResponse> GetMmrBucketAsync()
         {
-            return await CallDotaApiAsync<DotaApiMmrBucketResponse>("/distributions");
+            return await CallDotaApiAsync<DotaApiMmrBucketResponse>(options.Apis.Dota.MmrBuckets);
         }
 
         public Task<string> GetNameAsync(string heroId)
@@ -60,7 +65,18 @@ namespace Bracabot2.Services
 
         private async Task<T> CallDotaApiAsync<T>(string suffix)
         {
-            return await webApiService.GetAsync<T>($"https://api.opendota.com/api{suffix}");
+            logger.Debug("Dota API base address {0} - suffix {1}", httpClient.BaseAddress, suffix);
+
+            var response = await httpClient.GetAsync(suffix);
+            var responseJson = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.Error("Dota API response error: Status code {0} .. Message: {1}", response.StatusCode, responseJson);
+                return default;
+            }
+
+            logger.Debug("Dota API response JSON {0}", responseJson);
+            return JsonSerializer.Deserialize<T>(responseJson);
         }
     }
 }
