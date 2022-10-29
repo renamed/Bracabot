@@ -3,6 +3,7 @@ using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {
@@ -19,8 +20,10 @@ namespace Bracabot2.Commands
         }
 
         public async Task<string> ExecuteAsync(string[] args)
-        {            
+        {
             var dotaId = options.DotaId;
+            
+            var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
 
             IEnumerable<DotaApiRecentMatchResponse> response = await dotaService.GetRecentMatchesAsync(dotaId);
             if (response == default)            

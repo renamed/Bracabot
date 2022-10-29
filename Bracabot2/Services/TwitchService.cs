@@ -17,7 +17,7 @@ namespace Bracabot2.Services
 
 
         public TwitchService(IOptions<SettingsOptions> options, IHttpClientFactory clientFactory)
-        {
+    {
             this.options = options.Value;
             twitchApi = clientFactory.CreateClient(Consts.Clients.TWITCH_API_CLIENT);
             tokenTwitchApi = clientFactory.CreateClient(Consts.Clients.TWITCH_TOKEN_API_CLIENT);
@@ -33,7 +33,7 @@ namespace Bracabot2.Services
         }
 
         public async Task<bool> IsCurrentGameDota2()
-        {            
+        {
             var channelInfo = await GetChannelInfo();
             return channelInfo.Data.FirstOrDefault()?.GameId == Consts.Twitch.DOTA_2_ID;
         }

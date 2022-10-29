@@ -33,7 +33,7 @@ namespace Bracabot2.Commands
             if (medal == null)
             {
                 return "Deu bug, não encontrei a medalha informada pela Valve =/";
-            }            
+            }
 
             if (slot == 8)
             {
@@ -45,8 +45,9 @@ namespace Bracabot2.Commands
                 return $"Rank {player.LeaderboardRank}";
             }
             
-            int stars = player.RankTier % 10;
-            return $"{medal} {stars}";
+                int stars = player.RankTier % 10;
+                return $"{medal} {stars}";
+            }
         }
     }
 }

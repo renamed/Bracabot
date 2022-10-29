@@ -39,7 +39,7 @@ namespace Bracabot2.Commands
                 {"!tai", serviceProvider.GetService<PingCommand>() },
 
                 {"!histograma", serviceProvider.GetService<HistogramCommand>() }
-            };
+        };
         }
 
         public ICommand Get(string name)
