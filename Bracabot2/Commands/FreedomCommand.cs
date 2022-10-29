@@ -28,6 +28,7 @@ namespace Bracabot2.Commands
 
             var freedomTime = DateTime.UtcNow - response.FirstOrDefault().EndTime;
 
+
             var sb = new StringBuilder("Estamos há ");
             sb.Append(freedomTime.GetReadable());
             sb.Append($" sem o jogo de Dota bracubiClap");
