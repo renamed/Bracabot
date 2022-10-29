@@ -11,7 +11,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
 
-Config.AddEnvironmentVariables();
+
+            Config.AddEnvironmentVariables();
 
 IServiceCollection services = new ServiceCollection();
 services.AddSingleton<IDotaService, DotaService>()
@@ -19,7 +20,9 @@ services.AddSingleton<IDotaService, DotaService>()
             .AddSingleton<IBotFacade, TwitchFacade>()
             .AddSingleton<IIrcService, TwitchIrcService>()
             .AddSingleton<ITwitchService, TwitchService>()
+            .AddSingleton<IWebApiService, WebApiService>()
             .AddSingleton(sp => sp);
+
 
 var commandType = typeof(ICommand);
 var allCommands = AppDomain.CurrentDomain.GetAssemblies()
@@ -60,7 +63,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
 
 services.AddHttpClient<IDotaService, DotaService>()
         .ConfigureHttpClient((serviceProvider, httpClient) =>
-        {
+{
             var config = serviceProvider.GetRequiredService<IOptions<SettingsOptions>>();
             httpClient.BaseAddress = new Uri(config.Value.Apis.Dota.BaseAddress);
         })

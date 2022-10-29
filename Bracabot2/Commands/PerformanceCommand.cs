@@ -34,17 +34,18 @@ namespace Bracabot2.Commands
             {
                 return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";                
             }
+            int qtdJogos = eligibleMatches.Count();
 
             var statistics = new Dota2Statistics(eligibleMatches);
             if (statistics.HasError)
             {
                 return statistics.ErrorDescription;
             }
-                        
+
             var sb = new StringBuilder();
             sb.Append($"J = {statistics.Games} --- V -> {(statistics.Victories != 0 ? statistics.Victories.ToString() : "Nenhuma")} --- D -> {(statistics.Defeats != 0 ? statistics.Defeats.ToString() : "Nenhuma")} ");
             sb.Append($"--- Saldo {statistics.Mmr:+#;-#;0}");
-            
+
             sb.Append($" --- Média (K/D/A) ({statistics.AvgK}/{statistics.AvgD}/{statistics.AvgA}).");
 
             IEnumerable<IGrouping<int, DotaApiRecentMatchResponse>> heroIdMaisJogado = eligibleMatches.GroupBy(x => x.HeroId);

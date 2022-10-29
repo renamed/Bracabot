@@ -20,6 +20,7 @@ namespace Bracabot2.Services
 
             logger = Log.ForContext<DotaService>();
         }
+        
 
         public async Task<DotaApiPlayerResponse> GetPlayerAsync(string dotaId)
         {

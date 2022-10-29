@@ -1,4 +1,11 @@
-﻿namespace Bracabot2.Commands
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Bracabot2.Commands
 {
     public class CheerSubCommand : ICommand
     {
@@ -6,6 +13,8 @@
 
         public Task<string> ExecuteAsync(string[] args)
         {
+            //if (!line.Contains("mod=1"))
+            //{
             var diff = DateTime.UtcNow - ultimoToca;
             if (diff <= TimeSpan.FromMinutes(2))
             {

@@ -19,11 +19,11 @@ namespace Bracabot2.Commands
         }
 
         public async Task<string> ExecuteAsync(string[] args)
-        {            
+        {
             var dotaId = options.DotaId;
 
             IEnumerable<DotaApiRecentMatchResponse> response = await dotaService.GetRecentMatchesAsync(dotaId);
-            if (response == default)            
+            if (response == default)
                 return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";
 
             var freedomTime = DateTime.UtcNow - response.FirstOrDefault().EndTime;

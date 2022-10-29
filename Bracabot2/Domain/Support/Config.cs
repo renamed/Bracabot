@@ -1,4 +1,7 @@
-﻿namespace Bracabot2.Domain.Support
+﻿using System;
+using System.IO;
+
+namespace Bracabot2.Domain.Support
 {
     public static class Config
     {

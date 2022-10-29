@@ -2,6 +2,7 @@
 using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Bracabot2.Services
 {
