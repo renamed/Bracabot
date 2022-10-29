@@ -44,10 +44,10 @@ namespace Bracabot2.Commands
             {
                 return $"Rank {player.LeaderboardRank}";
             }
-            
-                int stars = player.RankTier % 10;
-                return $"{medal} {stars}";
-            }
+
+            int stars = player.RankTier % 10;
+            return $"{medal} {stars}";
         }
     }
 }
+

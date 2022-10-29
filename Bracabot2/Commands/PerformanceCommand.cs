@@ -4,7 +4,6 @@ using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {

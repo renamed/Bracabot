@@ -4,7 +4,6 @@ using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {
@@ -33,7 +32,7 @@ namespace Bracabot2.Commands
             var response = await dotaService.GetRecentMatchesAsync(dotaId);
             if (response == default)
             {
-                return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";                
+                return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";
             }
 
             var eligibleMatches = new List<DotaApiRecentMatchResponse>();
@@ -66,27 +65,6 @@ namespace Bracabot2.Commands
             if (statistics.HasError)
             {
                 return statistics.ErrorDescription;
-            }
-
-            int qtdVitoriasSolo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            int qtdVitoriasGrupo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
-
-            int qtdDerrotasSolo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            int qtdDerrotasGrupo = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
-
-            int qtdVitorias = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)));
-            int qtdDerrotas = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)));
-
-            //int qtdVitoriasRecalibracao = recalibracaoMatches.Where(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin))).Count();
-            //int qtdDerrotasRecalibracao = recalibracaoMatches.Where(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin))).Count();
-            //int qtdRecalibracao = qtdVitoriasRecalibracao + qtdDerrotasRecalibracao;
-
-            int mmr = 30 * qtdVitoriasSolo - 30 * qtdDerrotasSolo + 20 * qtdVitoriasGrupo - 20 * qtdDerrotasGrupo;
-
-            if (qtdVitorias + qtdDerrotas != qtdJogos)
-            {
-                Console.WriteLine($"Jogos {qtdJogos} = V {qtdVitorias} = D {qtdDerrotas}");
-                return "As contas do Renamede não estão corretas, avisa pra ele!";
             }
 
             var sb = new StringBuilder();
