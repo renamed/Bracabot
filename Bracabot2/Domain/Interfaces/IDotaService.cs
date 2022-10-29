@@ -6,7 +6,7 @@ namespace Bracabot2.Domain.Interfaces
 {
     public interface IDotaService
     {
-        Task<DotaApiHeroResponse> GetHeroAsync(string dotaId, string idHero);
+        Task<DotaApiHeroResponse> GetHeroStatisticsForPlayerAsync(string dotaId, string idHero);
         Task<string> GetIdAsync(string heroName);
         Task<string> GetMedalAsync(int medalId);
         Task<DotaApiMmrBucketResponse> GetMmrBucketAsync();

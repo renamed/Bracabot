@@ -1,4 +1,6 @@
 ﻿using Bracabot2.Domain.Interfaces;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -6,17 +8,24 @@ namespace Bracabot2.Services
 {
     public class TwitchIrcService : IDisposable, IIrcService
     {
+        private readonly SettingsOptions options;
+
         public TcpClient TcpClient { get; private set; }
         public StreamReader Reader { get; private set; }
         public StreamWriter Writer { get; private set; }
 
+        public TwitchIrcService(IOptions<SettingsOptions> options)
+        {
+            this.options = options.Value;
+        }
+
         public async Task ConnectAsync()
         {
-            string ip = Environment.GetEnvironmentVariable("IP_TWITCH_IRC");
-            int port = Convert.ToInt32(Environment.GetEnvironmentVariable("PORT_TWITCH_IRC"));
+            string ip = options.IpTwitchIrc;
+            int port = Convert.ToInt32(options.PortTwitchIrc);
             string password = Environment.GetEnvironmentVariable("PASSWORD_TWITCH_IRC");
             string username = Environment.GetEnvironmentVariable("USERNAME_TWITCH_IRC");
-            string nomeCanal = Environment.GetEnvironmentVariable("CHANNEL_NAME");
+            string nomeCanal = options.ChannelName;
 
             var tcpClient = new TcpClient();
             await tcpClient.ConnectAsync(ip, port);

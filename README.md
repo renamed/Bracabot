@@ -9,21 +9,20 @@ O intuito do bot é mostrar informações sobre o jogo de Dota 2.
 Este projeto utiliza o framework [Dotnet na versão 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0). Para rodá-lo, é necessário criar um arquivo `params.env` na raiz do projeto, com as seguintes informações
 
 ```
-DOTA_ID=?
-CHANNEL_NAME=?
-IP_TWITCH_IRC=?
-PORT_TWITCH_IRC=?
 USERNAME_TWITCH_IRC=?
 PASSWORD_TWITCH_IRC=?
 CLIENT_ID_TWITCH=?
 AUTHORIZATION_TWITCH=?
 ```
-
-- *Dota ID* é literalmente o seu ID no jogo de Dota 2, essa informação pode ser encontrada no seu perfil dentro do jogo.
-- *CHANNEL_NAME* é o canal em que o bot vai ler mensagens e respondê-las.
-- *IP_TWITCH_IRC* é o endereço DNS do servidor IRC da Twitch. Mais informações [neste link](https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server).
-- *PORT_TWITCH_IRC* Porta para o endereço DNS usado acima. Utilize esse [link](https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server).
 - *USERNAME_TWITCH_IRC* o nome de usuário na Twitch para ser usado como bot. Pessoalmente não utilizar sua conta pessoal.
 - *PASSWORD_TWITCH_IRC* o token a ser utilizado para conectar ao servidor IRC da Twitch. Gere o token [nesta página](https://twitchapps.com/tmi/).
-- *CLIENT_ID_TWITCH* NÃO É USADO ATUALMENTE. PODE SER OMITIDO[.](https://dev.twitch.tv/console).
-- *AUTHORIZATION_TWITCH* NÃO É USADO ATUALMENTE. PODE SER OMITIDO.
+- *CLIENT_ID_TWITCH* utilizamos a API da Twitch para obter o jogo atual do streamer, por exemplo. Gere um novo app utilizando sua conta do bot e obtenha o client_id seguindo [este link](https://dev.twitch.tv/console).
+- *AUTHORIZATION_TWITCH* utilizamos a API da Twitch para obter o jogo atual do streamer, por exemplo. Gere um novo app utilizando sua conta do bot e obtenha o secret seguindo [este link](https://dev.twitch.tv/console).
+
+Além disso, por favor verifique o arquivo `appsettings.json` com as seguintes configurações:
+
+- *DotaId* é literalmente o seu ID no jogo de Dota 2, essa informação pode ser encontrada no seu perfil dentro do jogo.
+- *ChannelName* é o canal em que o bot vai ler mensagens e respondê-las.
+- *TwitchBroadcastId* é o ID (e não o nome de usuário) do canal em que o bot vai ler e responder mensagens. Há alguns sites que podem ajudá-lo a obter essa informação, por exemplo, [este](https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/).
+- *IpTwitchIrc* é o endereço DNS do servidor IRC da Twitch. Mais informações [neste link](https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server). Não utilize o protocolo.
+- *PortTwitchIrc* Porta para o endereço DNS usado acima. Utilize esse [link](https://dev.twitch.tv/docs/irc#connecting-to-the-twitch-irc-server).

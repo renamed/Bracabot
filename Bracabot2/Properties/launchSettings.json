@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Bracabot2": {
+      "commandName": "Project"
+    },
+    "BracabotDev": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

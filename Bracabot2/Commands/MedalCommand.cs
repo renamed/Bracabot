@@ -1,10 +1,6 @@
 ﻿using Bracabot2.Domain.Interfaces;
-using Bracabot2.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 
 namespace Bracabot2.Commands
 {
@@ -12,18 +8,20 @@ namespace Bracabot2.Commands
     {
         private readonly IDotaService dotaService;
         private readonly ITwitchService twitchService;
+        private readonly SettingsOptions options;
 
-        public MedalCommand(IDotaService dotaService, ITwitchService twitchService)
+        public MedalCommand(IDotaService dotaService, ITwitchService twitchService, IOptions<SettingsOptions> options)
         {
             this.dotaService = dotaService;
             this.twitchService = twitchService;
+            this.options = options.Value;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
+            var dotaId = options.DotaId;
 
-            if (!await twitchService.EhOJogoDeDota())
+            if (!await twitchService.IsCurrentGameDota2())
             {
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }
@@ -39,13 +37,17 @@ namespace Bracabot2.Commands
 
             if (slot == 8)
             {
-                return $"{medal} - {player.RankTier}";
+                return $"{medal} rank {player.LeaderboardRank}";
             }
-            else
+
+            if (player.LeaderboardRank != null)
             {
-                int stars = player.RankTier % 10;
-                return $"{medal} {stars}";
+                return $"Rank {player.LeaderboardRank}";
             }
+
+            int stars = player.RankTier % 10;
+            return $"{medal} {stars}";
         }
     }
 }
+

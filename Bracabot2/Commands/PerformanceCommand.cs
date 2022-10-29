@@ -1,11 +1,9 @@
-﻿using Bracabot2.Domain.Interfaces;
+﻿using Bracabot2.Domain.Games.Dota2;
+using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
-using Bracabot2.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Options;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Bracabot2.Commands
 {
@@ -13,18 +11,20 @@ namespace Bracabot2.Commands
     {
         private readonly IDotaService dotaService;
         private readonly ITwitchService twitchService;
+        private readonly SettingsOptions options;
 
-        public PerformanceCommand(IDotaService dotaService, ITwitchService twitchService)
+        public PerformanceCommand(IDotaService dotaService, ITwitchService twitchService, IOptions<SettingsOptions> options)
         {
             this.dotaService = dotaService;
             this.twitchService = twitchService;
+            this.options = options.Value;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaId = Environment.GetEnvironmentVariable("DOTA_ID");
+            var dotaId = options.DotaId;
 
-            if (!await twitchService.EhOJogoDeDota())
+            if (!await twitchService.IsCurrentGameDota2())
             {
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }
@@ -36,38 +36,24 @@ namespace Bracabot2.Commands
             }
             int qtdJogos = eligibleMatches.Count();
 
-            int qtdVitoriasSolo = eligibleMatches.Where(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7).Count();
-            int qtdVitoriasGrupo = eligibleMatches.Where(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7).Count();
-
-            int qtdDerrotasSolo = eligibleMatches.Where(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7).Count();
-            int qtdDerrotasGrupo = eligibleMatches.Where(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7).Count();
-
-            int qtdVitorias = eligibleMatches.Where(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin))).Count();
-            int qtdDerrotas = eligibleMatches.Where(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin))).Count();
-
-            int mmr = 30 * qtdVitoriasSolo - 30 * qtdDerrotasSolo + 20 * qtdVitoriasGrupo - 20 * qtdDerrotasGrupo;
-
-            if (qtdVitorias + qtdDerrotas != qtdJogos)
+            var statistics = new Dota2Statistics(eligibleMatches);
+            if (statistics.HasError)
             {
-                Console.WriteLine($"Jogos {qtdJogos} = V {qtdVitorias} = D {qtdDerrotas}");
-                return "As contas do Renamede não estão corretas, avisa pra ele!";                
+                return statistics.ErrorDescription;
             }
 
             var sb = new StringBuilder();
-            sb.Append($"J = {qtdJogos} --- V -> {(qtdVitorias != 0 ? qtdVitorias.ToString() : "Nenhuma")} --- D -> {(qtdDerrotas != 0 ? qtdDerrotas.ToString() : "Nenhuma")} ");
-            sb.Append($"--- Saldo {mmr:+#;-#;0}");
+            sb.Append($"J = {statistics.Games} --- V -> {(statistics.Victories != 0 ? statistics.Victories.ToString() : "Nenhuma")} --- D -> {(statistics.Defeats != 0 ? statistics.Defeats.ToString() : "Nenhuma")} ");
+            sb.Append($"--- Saldo {statistics.Mmr:+#;-#;0}");
 
-            int mediaK = eligibleMatches.Sum(x => x.Kills) / qtdJogos;
-            int mediaD = eligibleMatches.Sum(x => x.Deaths) / qtdJogos;
-            int mediaA = eligibleMatches.Sum(x => x.Assists) / qtdJogos;
-            sb.Append($" --- Média (K/D/A) ({mediaK}/{mediaD}/{mediaA}).");
+            sb.Append($" --- Média (K/D/A) ({statistics.AvgK}/{statistics.AvgD}/{statistics.AvgA}).");
 
             IEnumerable<IGrouping<int, DotaApiRecentMatchResponse>> heroIdMaisJogado = eligibleMatches.GroupBy(x => x.HeroId);
             IGrouping<int, DotaApiRecentMatchResponse> qtd = heroIdMaisJogado.OrderByDescending(x => x.Count()).First();
 
             var nomeHeroMaisJogado = await dotaService.GetNameAsync(qtd.Key.ToString());
 
-            sb.Append($" --- {heroIdMaisJogado.Count()} heroi(s) único(s) --- Heroi mais jogado: {nomeHeroMaisJogado} com {qtd.Count()} vez(es) ({1.0 * qtd.Count() / qtdJogos:P1}).");
+            sb.Append($" --- {heroIdMaisJogado.Count()} heroi(s) único(s) --- Heroi mais jogado: {nomeHeroMaisJogado} com {qtd.Count()} vez(es) ({1.0 * qtd.Count() / statistics.Games:P1}).");
 
             return sb.ToString();
         }

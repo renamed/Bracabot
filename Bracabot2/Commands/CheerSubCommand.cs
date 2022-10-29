@@ -11,7 +11,7 @@ namespace Bracabot2.Commands
     {
         private static DateTime ultimoToca = DateTime.MinValue;
 
-        public async Task<string> ExecuteAsync(string[] args)
+        public Task<string> ExecuteAsync(string[] args)
         {
             //if (!line.Contains("mod=1"))
             //{
@@ -33,11 +33,11 @@ namespace Bracabot2.Commands
                     tempo = $"{diffRestante:mm} minuto e {diffRestante:ss} segundo(s)";
                 }
 
-                return "Aguarde mais {tempo} para usar o comando !toca";
+                return Task.FromResult($"Aguarde mais {tempo} para usar o comando !toca");
             }
 
             ultimoToca = DateTime.UtcNow;
-            return "!kappagen bracubiTrombeta ";
+            return Task.FromResult("!kappagen bracubiTrombeta ");
         }
     }
 }
