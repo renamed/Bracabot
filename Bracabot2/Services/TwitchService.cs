@@ -1,6 +1,7 @@
 ﻿using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.Json;
@@ -13,23 +14,33 @@ namespace Bracabot2.Services
         private readonly ILogger logger;
         private readonly HttpClient twitchApi;
         private readonly HttpClient tokenTwitchApi;
-        private static TwitchApiTokenResponse tokenCache;
+        private IMemoryCache cache;
 
 
-        public TwitchService(IOptions<SettingsOptions> options, IHttpClientFactory clientFactory)
-    {
+        public TwitchService(IOptions<SettingsOptions> options, IHttpClientFactory clientFactory, IMemoryCache cache)
+        {
             this.options = options.Value;
             twitchApi = clientFactory.CreateClient(Consts.Clients.TWITCH_API_CLIENT);
             tokenTwitchApi = clientFactory.CreateClient(Consts.Clients.TWITCH_TOKEN_API_CLIENT);
+            this.cache = cache;
 
             logger = Log.ForContext<TwitchService>();
+            
         }
 
         public async Task<TwitchApiChannelInfoResponse> GetChannelInfo()
         {
-            var twitchBroadcastId = options.TwitchBroadcastId;
-            var suffixUrl = string.Format(options.Apis.Twitch.ChannelInfo, twitchBroadcastId);
-            return await CallTwitchAsync<TwitchApiChannelInfoResponse>(suffixUrl);
+            return await cache.GetOrCreateAsync("TwitchService.GetChannelInfo", async e =>
+            {
+                var twitchBroadcastId = options.TwitchBroadcastId;
+                var suffixUrl = string.Format(options.Apis.Twitch.ChannelInfo, twitchBroadcastId);
+                var info = await CallTwitchAsync<TwitchApiChannelInfoResponse>(suffixUrl);
+                if (info == null)
+                    e.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
+                else
+                    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
+                return info;
+            });
         }
 
         public async Task<bool> IsCurrentGameDota2()
@@ -59,25 +70,26 @@ namespace Bracabot2.Services
 
         private async Task<TwitchApiTokenResponse> GetTokenAsync()
         {
-            if (tokenCache is not null && tokenCache.IsValid)
-                return tokenCache;
-
-            var clientId = Environment.GetEnvironmentVariable("CLIENT_ID_TWITCH");
-            var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET_TWITCH");
-            var grantType = Environment.GetEnvironmentVariable("GRANT_TYPE_TWITCH");
-
-            var urlSuffix = string.Format(options.Apis.Twitch.TokenSuffix, clientId, clientSecret, grantType);
-
-            var response = await tokenTwitchApi.PostAsync(urlSuffix, null);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
+            return await cache.GetOrCreateAsync("TwitchService.GetTokenAsync", async e =>
             {
-                logger.Error("Twitch API token status code {0} - response body {1}", response.StatusCode, responseBody);
-                return default;
-            }
+                var clientId = Environment.GetEnvironmentVariable("CLIENT_ID_TWITCH");
+                var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET_TWITCH");
+                var grantType = Environment.GetEnvironmentVariable("GRANT_TYPE_TWITCH");
 
-            tokenCache = JsonSerializer.Deserialize<TwitchApiTokenResponse>(responseBody);             
-            return tokenCache;
+                var urlSuffix = string.Format(options.Apis.Twitch.TokenSuffix, clientId, clientSecret, grantType);
+
+                var response = await tokenTwitchApi.PostAsync(urlSuffix, null);
+                var responseBody = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    logger.Error("Twitch API token status code {0} - response body {1}", response.StatusCode, responseBody);
+                    return default;
+                }
+
+                var tokenCache = JsonSerializer.Deserialize<TwitchApiTokenResponse>(responseBody);
+                e.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(tokenCache.ExpiresIn);
+                return tokenCache;
+            });
         }
     }
 }
