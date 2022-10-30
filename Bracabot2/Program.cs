@@ -85,6 +85,7 @@ services.AddHttpClient<TwitchService>(Consts.Clients.TWITCH_TOKEN_API_CLIENT)
             httpClient.Timeout = TimeSpan.FromSeconds(Consts.Clients.TWITCH_API_TOKEN_TIMEOUT);
         });
 
+services.AddMemoryCache();
 services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 var serviceProvider = services.BuildServiceProvider();
 
