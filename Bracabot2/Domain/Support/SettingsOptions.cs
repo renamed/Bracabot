@@ -28,6 +28,7 @@ namespace Bracabot2.Domain.Support
         public string RecentMatches { get; set; }
         public string HeroStatisticsForPlayer { get; set; }
         public string MmrBuckets { get; set; }
+        public string Peers { get; set; }
     }
 
     public class TwitchOptions
