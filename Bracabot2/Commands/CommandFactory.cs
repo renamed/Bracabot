@@ -38,7 +38,9 @@ namespace Bracabot2.Commands
 
                 {"!tai", serviceProvider.GetService<PingCommand>() },
 
-                {"!histograma", serviceProvider.GetService<HistogramCommand>() }
+                {"!histograma", serviceProvider.GetService<HistogramCommand>() },
+
+                {"!peer", serviceProvider.GetService<PeerCommand>() }
         };
         }
 
