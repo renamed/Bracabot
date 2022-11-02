@@ -6,7 +6,7 @@ namespace Bracabot2.Commands
     {
         public Task<string> ExecuteAsync(string[] args)
         {
-            return Task.FromResult("!aproveitamento !placar !heroi !medalha !tai !comandos !histograma !info !liberdade !recalibracao");
+            return Task.FromResult("!aproveitamento !placar !heroi !medalha !tai !comandos !histograma !info !liberdade !recalibracao !peer");
         }
     }
 }

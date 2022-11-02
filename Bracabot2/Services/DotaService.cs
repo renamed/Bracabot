@@ -42,7 +42,7 @@ namespace Bracabot2.Services
         public async Task<IEnumerable<DotaApiRecentMatchResponse>> GetRecentMatchesAsync(string dotaId)
         {
             return await cache.GetOrCreateAsync("DotaService.GetRecentMatchesAsync", async e =>
-            {                
+            {
                 var recentMatches = await CallDotaApiAsync<IEnumerable<DotaApiRecentMatchResponse>>(string.Format(options.Apis.Dota.RecentMatches, dotaId));
                 if (recentMatches == null)
                     e.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
@@ -86,6 +86,31 @@ namespace Bracabot2.Services
 
                 return mmrBucket;
             });
+        }
+
+        public async Task<DotaApiPeersResponse> GetPeersAsync(string dotaId, string accountId)
+        {
+            var peers = await cache.GetOrCreateAsync("DotaService.GetPeersAsync", async e =>
+            {
+                var peers = await CallDotaApiAsync<IEnumerable<DotaApiPeersResponse>>(string.Format(options.Apis.Dota.Peers, dotaId));
+                if (peers == null)
+                {
+                    e.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
+                    return default;
+                }
+
+                e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+                return (peers.ToDictionary(k => k.AccountId.ToString()), peers.ToDictionary(k => k.Personaname, StringComparer.OrdinalIgnoreCase));
+            });
+
+            if (peers == default)
+                return default;
+
+            accountId = accountId.Trim();
+            DotaApiPeersResponse peer;
+            return peers.Item1.TryGetValue(accountId, out peer) || peers.Item2.TryGetValue(accountId, out peer)
+                ? peer
+                : null;
         }
 
         public Task<string> GetNameAsync(string heroId)
