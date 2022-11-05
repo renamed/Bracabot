@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 
 
-            Config.AddEnvironmentVariables();
+Config.AddEnvironmentVariables();
 
 IServiceCollection services = new ServiceCollection();
 services.AddSingleton<IDotaService, DotaService>()
@@ -33,7 +33,8 @@ foreach (var currentCommand in allCommands)
     services.AddSingleton(currentCommand);
 
 services.AddLogging(configure => configure.AddConsole())
-    .Configure<LoggerFilterOptions>(options => {
+    .Configure<LoggerFilterOptions>(options =>
+    {
         options.MinLevel = LogLevel.Information;
     });
 
@@ -64,9 +65,9 @@ using IHost host = Host.CreateDefaultBuilder(args)
 services.AddHttpClient<IDotaService, DotaService>()
         .ConfigureHttpClient((serviceProvider, httpClient) =>
 {
-            var config = serviceProvider.GetRequiredService<IOptions<SettingsOptions>>();
-            httpClient.BaseAddress = new Uri(config.Value.Apis.Dota.BaseAddress);
-        })
+    var config = serviceProvider.GetRequiredService<IOptions<SettingsOptions>>();
+    httpClient.BaseAddress = new Uri(config.Value.Apis.Dota.BaseAddress);
+})
         .SetHandlerLifetime(TimeSpan.FromMinutes(60));
 
 services.AddHttpClient<TwitchService>(Consts.Clients.TWITCH_API_CLIENT)
