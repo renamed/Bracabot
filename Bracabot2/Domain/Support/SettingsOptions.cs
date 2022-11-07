@@ -37,5 +37,6 @@ namespace Bracabot2.Domain.Support
         public string ChannelInfo { get; set; }
         public string BaseAddressToken { get; set; }
         public string TokenSuffix { get; set; }
+        public string StreamInfo { get; set; }
     }
 }

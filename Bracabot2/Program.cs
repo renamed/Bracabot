@@ -1,6 +1,8 @@
-﻿using Bracabot2.Commands;
+﻿using AutoMapper;
+using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Support;
+using Bracabot2.Repository;
 using Bracabot2.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +12,7 @@ using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
-
+using System.Reflection;
 
 Config.AddEnvironmentVariables();
 
@@ -21,6 +23,7 @@ services.AddSingleton<IDotaService, DotaService>()
             .AddSingleton<IIrcService, TwitchIrcService>()
             .AddSingleton<ITwitchService, TwitchService>()
             .AddSingleton<IWebApiService, WebApiService>()
+            .AddSingleton<IDotaRepository, DotaRepository>()
             .AddSingleton(sp => sp);
 
 
@@ -43,7 +46,11 @@ Log.Logger = new LoggerConfiguration()
         .WriteTo.File(Path.Combine("logs", DateTime.UtcNow.Ticks + ".log"))
         .CreateLogger();
 
+var mapperConfig = new MapperConfiguration(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
+IMapper mapper = mapperConfig.CreateMapper();
+services.AddSingleton(mapper);
 
+services.AddDbContext<Dota2Context>();
 
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((hostingContext, configuration) =>

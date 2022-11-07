@@ -9,6 +9,8 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="12.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
@@ -27,6 +29,9 @@
 		<None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+		<None Update="dota2.db">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
     <None Update="params.env">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
