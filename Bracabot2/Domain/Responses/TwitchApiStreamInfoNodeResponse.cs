@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Bracabot2.Domain.Support;
+using System.Text.Json.Serialization;
 
 namespace Bracabot2.Domain.Responses
 {
@@ -32,7 +33,7 @@ namespace Bracabot2.Domain.Responses
         public int ViewerCount { get; set; }
 
         [JsonPropertyName("started_at")]
-        public DateTime? StartedAt { get; set; }
+        public DateTime StartedAt { get; set; }
 
         [JsonPropertyName("language")]
         public string Language { get; set; }
@@ -45,5 +46,7 @@ namespace Bracabot2.Domain.Responses
 
         [JsonPropertyName("is_mature")]
         public bool IsMature { get; set; }
+
+        public bool IsDota2Game => GameId == Consts.Twitch.DOTA_2_ID;
     }
 }

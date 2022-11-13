@@ -6,9 +6,9 @@ namespace Bracabot2.Repository
 {
     public class DotaRepository : IDotaRepository
     {
-        private readonly Dota2Context context;
+        private readonly DotaContext context;
 
-        public DotaRepository(Dota2Context context)
+        public DotaRepository(DotaContext context)
         {
             this.context = context;
         }
@@ -18,9 +18,9 @@ namespace Bracabot2.Repository
             return await context.Matches.OrderByDescending(d => d.EndTime).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Match>> GetLastMatchesAsync(int limit = 50)
+        public async Task<IEnumerable<Match>> GetLastMatchesAsync(DateTime fromEndTime)
         {
-            return await context.Matches.OrderByDescending(d => d.EndTime).Take(limit).ToArrayAsync();
+            return await context.Matches.Where(d => d.EndTime >= fromEndTime).ToArrayAsync();
         }
 
         public Task<int> AddAsync(Match match)
@@ -29,11 +29,19 @@ namespace Bracabot2.Repository
             return context.SaveChangesAsync();
         }
 
-        public async Task AddAsync(IEnumerable<Match> matches)
+        public async Task<int> AddIfNotExistsAsync(IEnumerable<Match> matches)
         {
-            var tasks = new List<Task<int>>();
-            matches.ToList().ForEach(match => tasks.Add(AddAsync(match)));
-            await Task.WhenAll(tasks);
+            var ids = matches.Select(x => x.MatchId);
+            var existingMatches = (await context.Matches.Where(x => ids.Contains(x.MatchId)).ToListAsync()).Select(x => x.MatchId).ToHashSet();
+
+            matches.ToList().ForEach(match =>
+            {
+                if (!existingMatches.Contains(match.MatchId))
+                {
+                    context.Matches.Add(match);
+                }
+            });
+            return await context.SaveChangesAsync();
         }
     }
 }

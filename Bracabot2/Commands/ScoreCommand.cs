@@ -1,6 +1,5 @@
 ﻿using Bracabot2.Domain.Games.Dota2;
 using Bracabot2.Domain.Interfaces;
-using Bracabot2.Domain.Responses;
 using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
 using System.Text;
@@ -9,56 +8,37 @@ namespace Bracabot2.Commands
 {
     public class ScoreCommand : ICommand
     {
-        private readonly IDotaService dotaService;
-        private readonly ITwitchService twitchService;
-        private readonly SettingsOptions options;
+        private readonly ITwitchService twitchService;        
+        private readonly IDotaRepository dotaRepository;
 
-        public ScoreCommand(IDotaService dotaService, ITwitchService twitchService, IOptions<SettingsOptions> options)
+        public ScoreCommand(ITwitchService twitchService, IDotaRepository dotaRepository)
         {
-            this.dotaService = dotaService;
-            this.twitchService = twitchService;
-            this.options = options.Value;
+            this.twitchService = twitchService;            
+            this.dotaRepository = dotaRepository;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaId = options.DotaId;
+            var streamInfo = await twitchService.GetStreamInfo();
+            if (streamInfo == default)
+            {
+                return "Streamer não está online";
+            }
 
-            if (!await twitchService.IsCurrentGameDota2())
+            if (!streamInfo.IsDota2Game)
             {
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }
 
-            var response = await dotaService.GetRecentMatchesAsync(dotaId);
-            if (response == default)
+            var eligibleMatches = await dotaRepository.GetLastMatchesAsync(streamInfo.StartedAt);
+            if (eligibleMatches == default)
             {
-                return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";
+                return "Nenhuma partida encontrada. Seria essa a primeira do dia? ;)";
             }
 
-            var eligibleMatches = new List<DotaApiRecentMatchResponse>();
-            DotaApiRecentMatchResponse lastMatch = null;
-            foreach (var currentMatch in response)
+            if (!eligibleMatches.Any())
             {
-                if (lastMatch == null)
-                {
-                    eligibleMatches.Add(currentMatch);
-                    lastMatch = currentMatch;
-                }
-                else
-                {
-                    if (lastMatch.StartTime - currentMatch.StartTime >= TimeSpan.FromHours(5))
-                    {
-                        break;
-                    }
-
-                    eligibleMatches.Add(currentMatch);
-                    lastMatch = currentMatch;
-                }
-            }
-
-            if (DateTime.UtcNow - eligibleMatches.Max(x => x.StartTime) >= TimeSpan.FromHours(5))
-            {
-                return "Não achei partidas recentes";
+                return "Nenhuma partida encontrada. Seria essa a primeira do dia? ;)";
             }
 
             var statistics = new Dota2Statistics(eligibleMatches);

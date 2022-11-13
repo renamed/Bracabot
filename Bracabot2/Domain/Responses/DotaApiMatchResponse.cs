@@ -41,7 +41,7 @@ namespace Bracabot2.Domain.Responses
         public int Assists { get; set; }
 
         [JsonPropertyName("average_rank")]
-        public int AverageRank { get; set; }
+        public int? AverageRank { get; set; }
 
         [JsonPropertyName("leaver_status")]
         public int LeaverStatus { get; set; }

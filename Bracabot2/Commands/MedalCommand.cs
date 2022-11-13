@@ -20,8 +20,13 @@ namespace Bracabot2.Commands
         public async Task<string> ExecuteAsync(string[] args)
         {
             var dotaId = options.DotaId;
+            var streamInfo = await twitchService.GetStreamInfo();
+            if (streamInfo == default)
+            {
+                return "Streamer não está online";
+            }
 
-            if (!await twitchService.IsCurrentGameDota2())
+            if (!streamInfo.IsDota2Game)
             {
                 return "Comando só disponível quando o streamer estiver jogando o jogo de Dota. !dota tem todas as informações.";
             }

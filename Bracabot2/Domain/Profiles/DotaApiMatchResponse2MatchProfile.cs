@@ -31,7 +31,7 @@ namespace Bracabot2.Domain.Profiles
                     dest => dest.EndTime,
                     act => act.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds(src.UnixStartTime)
                                                 .AddSeconds(src.Duration).DateTime.ToUniversalTime())
-                );
+                ).ReverseMap();
             
         }
 
