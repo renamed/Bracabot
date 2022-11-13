@@ -1,14 +1,13 @@
 ﻿using Bracabot2.Domain.Games.Dota2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql;
 using MatchType = Bracabot2.Domain.Games.Dota2.MatchType;
 
 namespace Bracabot2.Repository
 {
-    public class Dota2Context : DbContext
+    public class DotaContext : DbContext
     {
-        public Dota2Context(DbContextOptions options) : base(options)
+        public DotaContext(DbContextOptions options) : base(options)
         {
 
         }

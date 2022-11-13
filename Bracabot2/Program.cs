@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Bracabot2.Commands;
+using Bracabot2.Crons;
 using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Support;
 using Bracabot2.Repository;
@@ -11,12 +12,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Quartz;
 using Serilog;
 using System.Reflection;
 
 Config.AddEnvironmentVariables();
 
 IServiceCollection services = new ServiceCollection();
+
+var mapperConfig = new MapperConfiguration(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
+IMapper mapper = mapperConfig.CreateMapper();
 services.AddSingleton<IDotaService, DotaService>()
             .AddSingleton<CommandFactory>()
             .AddSingleton<IBotFacade, TwitchFacade>()
@@ -24,8 +29,11 @@ services.AddSingleton<IDotaService, DotaService>()
             .AddSingleton<ITwitchService, TwitchService>()
             .AddSingleton<IWebApiService, WebApiService>()
             .AddSingleton<IDotaRepository, DotaRepository>()
+            .AddSingleton<IStreamOnlineVerifierJob, TwitchStreamStatusVerifierJob>()
+            .AddSingleton<IRecentMatchesJob, DotaRecentMatchesJob>()
+            .AddSingleton(mapper)
             .AddSingleton(sp => sp);
-
+services.AddDbContext<DotaContext>();
 
 var commandType = typeof(ICommand);
 var allCommands = AppDomain.CurrentDomain.GetAssemblies()
@@ -35,22 +43,19 @@ var allCommands = AppDomain.CurrentDomain.GetAssemblies()
 foreach (var currentCommand in allCommands)
     services.AddSingleton(currentCommand);
 
-services.AddLogging(configure => configure.AddConsole())
-    .Configure<LoggerFilterOptions>(options =>
-    {
-        options.MinLevel = LogLevel.Information;
-    });
+
+services.AddLogging(configure =>
+{
+    configure.AddFilter("Microsoft", LogLevel.Warning)
+           .AddConsole();
+});
 
 Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Information()
         .WriteTo.Console()
-        .WriteTo.File(Path.Combine("logs", DateTime.UtcNow.Ticks + ".log"))
+        .WriteTo.File(Path.Combine("logs", DateTime.UtcNow.Ticks + ".log"))        
         .CreateLogger();
 
-var mapperConfig = new MapperConfiguration(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
-IMapper mapper = mapperConfig.CreateMapper();
-services.AddSingleton(mapper);
-
-services.AddDbContext<Dota2Context>();
 
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((hostingContext, configuration) =>
@@ -95,8 +100,26 @@ services.AddHttpClient<TwitchService>(Consts.Clients.TWITCH_TOKEN_API_CLIENT)
 
 services.AddMemoryCache();
 services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
+
 var serviceProvider = services.BuildServiceProvider();
+var jobFactory = new JobFactory(serviceProvider);
+
+IScheduler scheduler = await SchedulerBuilder.Create()
+    .UseDefaultThreadPool(x => x.MaxConcurrency = 1)
+    .BuildScheduler();
+scheduler.JobFactory = jobFactory;
+
+IJobDetail twitchStreamStatusVerifierJob = JobBuilder.Create<IStreamOnlineVerifierJob>()
+                .Build();
+
+ITrigger twitchStreamStatusVerifierJobTrigger = TriggerBuilder.Create()
+                .StartNow()
+                .Build();
+
+await scheduler.Start();
+await scheduler.ScheduleJob(twitchStreamStatusVerifierJob, twitchStreamStatusVerifierJobTrigger);
+
 
 var botFacade = serviceProvider.GetService<IBotFacade>();
-
 await botFacade.RunBotAsync();
+await scheduler.Shutdown();

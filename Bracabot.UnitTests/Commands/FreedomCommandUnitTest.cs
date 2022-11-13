@@ -5,7 +5,6 @@ using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
 using Moq;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,46 +12,52 @@ namespace Bracabot.UnitTests.Commands
 {
     public class FreedomCommandUnitTest
     {
-        private readonly Mock<IDotaService> dotaService;
+        private readonly Mock<IDotaRepository> dotaRepository;
+        private readonly Mock<ITwitchService> twitchService;
         private readonly IOptions<SettingsOptions> options;
 
         public FreedomCommandUnitTest()
         {
-            dotaService = new Mock<IDotaService>();
+            dotaRepository = new Mock<IDotaRepository>();
+            twitchService = new Mock<ITwitchService>();
             options = Options.Create(new SettingsOptions());
         }
 
         [Fact]
-        public async Task ExecuteAsync_ShouldReturnMessageError_WhenDotaApiIsUnavailable()
+        public async Task ExecuteAsync_ShouldReturnMessageError_WhenTwitchApiIsUnavailable()
         {
             // Arrange
-            dotaService.Setup(x => x.GetRecentMatchesAsync(It.IsAny<string>()))
-                .ReturnsAsync((IEnumerable<DotaApiRecentMatchResponse>)null);
+            twitchService.Setup(x => x.GetStreamInfo())
+                .ReturnsAsync((TwitchApiStreamInfoNodeResponse)null);
 
-            var freedomCommand = new FreedomCommand(dotaService.Object, options);
+            var freedomCommand = new FreedomCommand(dotaRepository.Object, twitchService.Object);
 
             // Act
             var response = await freedomCommand.ExecuteAsync(null);
 
             // Assert
-            Assert.Equal("A API do Dota retornou um erro. Não consegui ver as últimas partidas", response);
+            Assert.Equal("Streamer não está online", response);
         }
 
         [Fact]
         public async Task ExecuteAsync_ShouldReturnMessage_WhenDotaApiReturns()
         {
             // Arrange
-            dotaService.Setup(x => x.GetRecentMatchesAsync(It.IsAny<string>()))
-                .ReturnsAsync(new DotaApiRecentMatchResponse[]
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
                 {
-                    new DotaApiRecentMatchResponse
-                    {
-                        UnixStartTime = (int)DateTimeOffset.UtcNow.AddDays(-10).ToUnixTimeSeconds(),
-                        Duration = 1
-                    }
+                    GameId = "aaa"
                 });
 
-            var freedomCommand = new FreedomCommand(dotaService.Object, options);
+            dotaRepository.Setup(x => x.GetLastMatchAsync())
+                .ReturnsAsync(
+                    new Bracabot2.Domain.Games.Dota2.Match
+                    {
+                        StartTime = DateTime.UtcNow.AddDays(-10),
+                        EndTime = DateTime.UtcNow.AddDays(-10).AddSeconds(1)
+                    });
+
+            var freedomCommand = new FreedomCommand(dotaRepository.Object, twitchService.Object);
 
             // Act
             var response = await freedomCommand.ExecuteAsync(null);

@@ -5,8 +5,8 @@ namespace Bracabot2.Domain.Interfaces
     public interface IDotaRepository
     {
         Task<int> AddAsync(Match match);
-        Task AddAsync(IEnumerable<Match> matches);
+        Task<int> AddIfNotExistsAsync(IEnumerable<Match> matches);
         Task<Match> GetLastMatchAsync();
-        Task<IEnumerable<Match>> GetLastMatchesAsync(int limit = 50);
+        Task<IEnumerable<Match>> GetLastMatchesAsync(DateTime fromEndTime);
     }
 }

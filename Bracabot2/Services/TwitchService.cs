@@ -28,25 +28,19 @@ namespace Bracabot2.Services
             
         }
 
-        public async Task<TwitchApiChannelInfoResponse> GetChannelInfo()
+        public async Task<TwitchApiStreamInfoNodeResponse> GetStreamInfo()
         {
-            return await cache.GetOrCreateAsync("TwitchService.GetChannelInfo", async e =>
+            return await cache.GetOrCreateAsync("TwitchService.GetStreamInfo", async e =>
             {
                 var twitchBroadcastId = options.TwitchBroadcastId;
-                var suffixUrl = string.Format(options.Apis.Twitch.ChannelInfo, twitchBroadcastId);
-                var info = await CallTwitchAsync<TwitchApiChannelInfoResponse>(suffixUrl);
+                var suffixUrl = string.Format(options.Apis.Twitch.StreamInfo, twitchBroadcastId);
+                var info = await CallTwitchAsync<TwitchApiStreamInfoResponse>(suffixUrl);
                 if (info == null)
                     e.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
                 else
-                    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
-                return info;
+                    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(20);
+                return info?.Data?.FirstOrDefault();
             });
-        }
-
-        public async Task<bool> IsCurrentGameDota2()
-        {
-            var channelInfo = await GetChannelInfo();
-            return channelInfo.Data.FirstOrDefault()?.GameId == Consts.Twitch.DOTA_2_ID;
         }
 
         private async Task<T> CallTwitchAsync<T>(string suffix)
