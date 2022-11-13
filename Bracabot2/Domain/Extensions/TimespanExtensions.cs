@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Bracabot2.Domain.Support
+namespace Bracabot2.Domain.Extensions
 {
     public static class TimespanExtensions
     {

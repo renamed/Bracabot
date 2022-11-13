@@ -31,7 +31,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenStreamerIsNotPlayingDota2()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = "asdasd"
+                });
             var peerCommand = new PeerCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
@@ -45,7 +49,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenArgsIsNull()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             var peerCommand = new PeerCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
@@ -59,7 +67,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenArgsIsEmpty()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             var peerCommand = new PeerCommand(dotaService.Object, twitchService.Object, options);
             var args = Enumerable.Empty<string>().ToArray();
 
@@ -74,7 +86,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenPeerCannotBeFound()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             dotaService.Setup(s => s.GetPeersAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((DotaApiPeersResponse)null);
             var args = new string[] { "aa" };
             var peerCommand = new PeerCommand(dotaService.Object, twitchService.Object, options);
@@ -90,7 +106,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnMessage_WhenPeerIsFound()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             dotaService.Setup(s => s.GetPeersAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(new DotaApiPeersResponse
                 {

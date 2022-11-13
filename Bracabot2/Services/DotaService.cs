@@ -39,16 +39,16 @@ namespace Bracabot2.Services
             });
         }
 
-        public async Task<IEnumerable<DotaApiRecentMatchResponse>> GetRecentMatchesAsync(string dotaId)
+        public async Task<IEnumerable<DotaApiMatchResponse>> GetMatchesAsync(string dotaId, int days)
         {
-            return await cache.GetOrCreateAsync("DotaService.GetRecentMatchesAsync", async e =>
+            return await cache.GetOrCreateAsync($"DotaService.GetMatchesAsync{dotaId}{days}", async e =>
             {
-                var recentMatches = await CallDotaApiAsync<IEnumerable<DotaApiRecentMatchResponse>>(string.Format(options.Apis.Dota.RecentMatches, dotaId));
-                if (recentMatches == null)
+                var matches = await CallDotaApiAsync<IEnumerable<DotaApiMatchResponse>>(string.Format(options.Apis.Dota.Matches, dotaId, days));
+                if (matches == null)
                     e.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
                 else
-                    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
-                return recentMatches;
+                    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+                return matches;
             });
         }
 

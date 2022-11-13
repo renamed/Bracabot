@@ -33,7 +33,12 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNotPlayingDota2()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(false);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = "abc"
+                });
+
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
@@ -47,7 +52,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenArgsIsNull()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
 
             // Act
@@ -61,7 +70,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNoHeroNameIsNotInformed()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
             var args = Enumerable.Empty<string>().ToArray();
 
@@ -76,7 +89,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenNoHeroNameIsUnknown()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync((string)null);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
             
@@ -91,7 +108,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenDotaApiReturnsError()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroStatisticsForPlayerAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((DotaApiHeroResponse)null);
             var heroCommand = new HeroCommand(dotaService.Object, twitchService.Object, options);
@@ -107,7 +128,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnError_WhenDotaApiReturnsError2()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroStatisticsForPlayerAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync((string)null);
@@ -124,7 +149,11 @@ namespace Bracabot.UnitTests.Commands
         public async Task ExecuteAsync_ShouldReturnMessage_WhenEverythingWorrksFine()
         {
             // Arrange
-            twitchService.Setup(s => s.IsCurrentGameDota2()).ReturnsAsync(true);
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
             dotaService.Setup(s => s.GetIdAsync(It.IsAny<string>())).ReturnsAsync("bb");
             dotaService.Setup(s => s.GetHeroStatisticsForPlayerAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new DotaApiHeroResponse());
             dotaService.Setup(s => s.GetNameAsync(It.IsAny<string>())).ReturnsAsync("Hero");

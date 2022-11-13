@@ -1,7 +1,5 @@
 ﻿using Bracabot.UnitTests.Support;
 using Bracabot2.Domain.Games.Dota2;
-using Bracabot2.Domain.Responses;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Bracabot.UnitTests.Domain.Games.Dota2
@@ -12,27 +10,23 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
         public void Dota2Statistics_ShouldReturnError_WhenGameCountDoesNotMatchVictoryPlusLoses()
         {
             // Arrange            
-            var matches = new FakeList<DotaApiRecentMatchResponse>(new[]
+            var matches = new FakeList<Match>(new[]
             {
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = true
+                    MatchResult = MatchResult.Win
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = false
+                    MatchResult = MatchResult.Lose
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 101,
-                    RadiantWin = true
+                    MatchResult = MatchResult.Lose
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 101,
-                    RadiantWin = false
+                    MatchResult = MatchResult.Win
                 }
             });
 
@@ -50,42 +44,42 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             // Arrange
             var matches = new []
             {
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = true,
-                    LobbyType = 1,
+                    MatchResult = MatchResult.Win,
+                    MatchType = MatchType.Normal,
                     Kills = 10,
                     Deaths = 20,
-                    Assists = 30
+                    Assists = 30,
+                    PartySize = 1
 
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = false,
-                    LobbyType = 1,
+                    MatchResult = MatchResult.Lose,
+                    MatchType = MatchType.Normal,
                     Kills = 20,
                     Deaths = 30,
-                    Assists = 40
+                    Assists = 40,
+                    PartySize = 1
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 101,
-                    RadiantWin = true,
-                    LobbyType = 1,
+                    MatchResult = MatchResult.Lose,
+                    MatchType = MatchType.Normal,
                     Kills = 30,
                     Deaths = 40,
-                    Assists = 50
+                    Assists = 50,
+                    PartySize = 1
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 101,
-                    RadiantWin = false,
-                    LobbyType = 7,
+                    MatchResult = MatchResult.Win,
+                    MatchType = MatchType.Ranked,
                     Kills = 40,
                     Deaths = 50,
-                    Assists = 60
+                    Assists = 60,
+                    PartySize = 1
                 }
             };
 
@@ -108,21 +102,19 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             // Arrange
             var matches = new []
             {
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = false,
-                    LobbyType = 1,
+                    MatchResult = MatchResult.Lose,
+                    MatchType = MatchType.Normal,
                     Kills = 10,
                     Deaths = 20,
                     Assists = 30
 
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = false,
-                    LobbyType = 1,
+                    MatchResult = MatchResult.Lose,
+                    MatchType = MatchType.Normal,
                     Kills = 20,
                     Deaths = 30,
                     Assists = 40
@@ -148,21 +140,19 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             // Arrange
             var matches = new []
             {
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = true,
-                    LobbyType = 1,
+                    MatchResult = MatchResult.Win,
+                    MatchType = MatchType.Normal,
                     Kills = 10,
                     Deaths = 20,
                     Assists = 30
 
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = true,
-                    LobbyType = 1,
+                    MatchResult = MatchResult.Win,
+                    MatchType = MatchType.Normal,
                     Kills = 20,
                     Deaths = 30,
                     Assists = 40
@@ -188,26 +178,24 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             // Arrange
             var matches = new []
             {
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 1,
-                    RadiantWin = true,
-                    LobbyType = 7,
+                    MatchResult = MatchResult.Win,
+                    MatchType = MatchType.Ranked,
                     Kills = 10,
                     Deaths = 20,
                     Assists = 30,
-                    party_size =  2
+                    PartySize = 2
 
                 },
-                new DotaApiRecentMatchResponse
+                new Match
                 {
-                    PlayerSlot = 103,
-                    RadiantWin = false,
-                    LobbyType = 7,
+                    MatchResult = MatchResult.Win,
+                    MatchType = MatchType.Ranked,
                     Kills = 20,
                     Deaths = 30,
                     Assists = 40,
-                    party_size =  2
+                    PartySize =  2
                 }
             };
 
