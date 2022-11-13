@@ -1,32 +1,38 @@
-﻿using Bracabot2.Domain.Interfaces;
-using Bracabot2.Domain.Responses;
-using Bracabot2.Domain.Support;
-using Microsoft.Extensions.Options;
+﻿using Bracabot2.Domain.Extensions;
+using Bracabot2.Domain.Interfaces;
 using System.Text;
 
 namespace Bracabot2.Commands
 {
     public class FreedomCommand : ICommand
     {
-        private readonly IDotaService dotaService;
-        private SettingsOptions options;
+        private readonly IDotaRepository dotaRepository;
+        private readonly ITwitchService twitchService;
 
-        public FreedomCommand(IDotaService dotaService,
-            IOptions<SettingsOptions> options)
+        public FreedomCommand(IDotaRepository dotaRepository, ITwitchService twitchService)
         {
-            this.dotaService = dotaService;
-            this.options = options.Value;
+            this.dotaRepository = dotaRepository;
+            this.twitchService = twitchService;
         }
 
         public async Task<string> ExecuteAsync(string[] args)
         {
-            var dotaId = options.DotaId;
+            var streamInfo = await twitchService.GetStreamInfo();
+            if (streamInfo == default)
+            {
+                return "Streamer não está online";
+            }
 
-            IEnumerable<DotaApiRecentMatchResponse> response = await dotaService.GetRecentMatchesAsync(dotaId);
-            if (response == default)
-                return "A API do Dota retornou um erro. Não consegui ver as últimas partidas";
+            if (streamInfo.IsDota2Game)
+            {
+                return "O jogo de Dota 2 está rolando agora :D";
+            }
 
-            var freedomTime = DateTime.UtcNow - response.FirstOrDefault().EndTime;
+            var lastMatch = await dotaRepository.GetLastMatchAsync();
+            if (lastMatch == default)            
+                return "Não encontrei partidas recentes do jogo de Dota 2";            
+
+            var freedomTime = DateTime.UtcNow - lastMatch.EndTime;
 
 
             var sb = new StringBuilder("Estamos há ");
