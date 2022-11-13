@@ -31,6 +31,7 @@ services.AddSingleton<IDotaService, DotaService>()
             .AddSingleton<IDotaRepository, DotaRepository>()
             .AddSingleton<IStreamOnlineVerifierJob, TwitchStreamStatusVerifierJob>()
             .AddSingleton<IRecentMatchesJob, DotaRecentMatchesJob>()
+            .AddSingleton<ITwitchMessageHandler, TwitchMessageHandler>()
             .AddSingleton(mapper)
             .AddSingleton(sp => sp);
 services.AddDbContext<DotaContext>();
@@ -51,7 +52,7 @@ services.AddLogging(configure =>
 });
 
 Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Information()
+        .MinimumLevel.Debug()
         .WriteTo.Console()
         .WriteTo.File(Path.Combine("logs", DateTime.UtcNow.Ticks + ".log"))        
         .CreateLogger();

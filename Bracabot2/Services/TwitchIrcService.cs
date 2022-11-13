@@ -44,14 +44,9 @@ namespace Bracabot2.Services
             return await Reader.ReadLineAsync();
         }
 
-        public Task SendPongAsync(string pongParam)
+        public async Task SendMessageAsync(string message)
         {
-            return Writer.WriteLineAsync($"PONG {pongParam}");
-        }
-
-        public async Task SendMessageAsync(string channelName, string message)
-        {
-            await Writer.WriteLineAsync($"PRIVMSG #{channelName} :{message}");
+            await Writer.WriteLineAsync(message);
         }
 
         

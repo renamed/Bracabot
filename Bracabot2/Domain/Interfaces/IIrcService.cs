@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-
-namespace Bracabot2.Domain.Interfaces
+﻿namespace Bracabot2.Domain.Interfaces
 {
     public interface IIrcService
     {
@@ -10,7 +7,6 @@ namespace Bracabot2.Domain.Interfaces
 
         Task ConnectAsync();
         Task<string> GetMessageAsync();
-        Task SendMessageAsync(string channelName, string message);
-        Task SendPongAsync(string pongParam);
+        Task SendMessageAsync(string message);
     }
 }

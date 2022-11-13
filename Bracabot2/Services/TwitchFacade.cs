@@ -1,6 +1,7 @@
 ﻿using Bracabot2.Commands;
 using Bracabot2.Domain.Interfaces;
 using Bracabot2.Domain.Support;
+using Bracabot2.Domain.TwitchChat.Parsers;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Diagnostics;
@@ -11,62 +12,40 @@ namespace Bracabot2.Services
     {
         public volatile bool ShouldStop;
 
-        private readonly CommandFactory commandFactory;
+        private readonly ITwitchMessageHandler twitchMessageHandler;
+        
         private readonly ILogger logger;
         private readonly SettingsOptions options;
         private readonly IIrcService twitchIrcService;
 
-        public TwitchFacade(CommandFactory commandFactory
-            , IOptions<SettingsOptions> options, IIrcService twitchIrcService)
+        public TwitchFacade(IOptions<SettingsOptions> options, IIrcService twitchIrcService, ITwitchMessageHandler twitchMessageHandler)
         {
-            this.commandFactory = commandFactory;
-            this.options = options.Value;            
+            this.options = options.Value;
             this.twitchIrcService = twitchIrcService;
 
             logger = Log.ForContext<TwitchFacade>();
+            this.twitchMessageHandler = twitchMessageHandler;
         }
 
         public async Task RunBotAsync()
         {
-            string channelName = options.ChannelName;
-
             await twitchIrcService.ConnectAsync();
             logger.Information("Connected to {0}", options.ChannelName);
-            
+
             while (!ShouldStop)
             {
                 string line = await twitchIrcService.GetMessageAsync();
-                if (line == null) continue;
+                if (line is null) continue;
 
                 logger.Debug(line);
 
-                var watch = new Stopwatch();
-                string[] split = line.Split(" ");
-                if (line.StartsWith("PING"))
-                {
-                    logger.Debug("PING");
-                    await twitchIrcService.SendPongAsync(split[1]);
-                }
-                else if (line.Contains("PRIVMSG"))
-                {
-                    var tokens = line.Split(":", StringSplitOptions.RemoveEmptyEntries);
-                    var comandos = tokens.Last().Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                    if (!comandos.Any()) continue;
+                var parsed = TwitchMessageParser.Parse(line);
+                if (parsed is null)
+                    continue;
 
-                    var commandName = comandos.First().Trim();
-                    var commandArgs = comandos.Skip(1);
+                var message = await twitchMessageHandler.Handle(parsed);
+                await twitchIrcService.SendMessageAsync(message);
 
-                    var command = commandFactory.Get(commandName);
-                    if (command == null) continue;
-
-                    watch.Restart();
-                    var message = await command.ExecuteAsync(commandArgs?.ToArray());
-                    watch.Stop();
-
-                    logger.Information("Command {0} executed in {1} ms", commandName, watch.ElapsedMilliseconds);
-
-                    await twitchIrcService.SendMessageAsync(channelName, message);
-                }
             }
         }
     }
