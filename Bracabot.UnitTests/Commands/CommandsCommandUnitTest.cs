@@ -15,7 +15,7 @@ namespace Bracabot.UnitTests.Commands
             var response = await command.ExecuteAsync(null);
 
             // Assert
-            Assert.Equal("!aproveitamento !placar !heroi !medalha !tai !comandos !histograma !info !liberdade !recalibracao", response);
+            Assert.Equal("!aproveitamento !placar !heroi !medalha !tai !comandos !histograma !info !liberdade !recalibracao !peer", response);
         }
     }
 }

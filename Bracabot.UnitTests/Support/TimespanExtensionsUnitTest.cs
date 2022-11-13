@@ -1,4 +1,4 @@
-﻿using Bracabot2.Domain.Support;
+﻿using Bracabot2.Domain.Extensions;
 using System;
 using Xunit;
 

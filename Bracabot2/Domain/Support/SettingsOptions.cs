@@ -25,16 +25,17 @@ namespace Bracabot2.Domain.Support
     {
         public string BaseAddress { get; set; }
         public string Players { get; set; }
-        public string RecentMatches { get; set; }
         public string HeroStatisticsForPlayer { get; set; }
         public string MmrBuckets { get; set; }
+        public string Peers { get; set; }
+        public string Matches { get; set; }
     }
 
     public class TwitchOptions
     {
         public string BaseAddress { get; set; }
-        public string ChannelInfo { get; set; }
         public string BaseAddressToken { get; set; }
         public string TokenSuffix { get; set; }
+        public string StreamInfo { get; set; }
     }
 }

@@ -23,12 +23,12 @@ namespace Bracabot2.Domain.Games.Dota2
         public bool HasError { get; private set; }
         public string ErrorDescription { get; private set; }
 
-        public Dota2Statistics(IEnumerable<DotaApiRecentMatchResponse> eligibleMatches)
+        public Dota2Statistics(IEnumerable<Match> eligibleMatches)
         {
             CompileInformation(eligibleMatches);
         }
 
-        public void CompileInformation(IEnumerable<DotaApiRecentMatchResponse> eligibleMatches)
+        public void CompileInformation(IEnumerable<Match> eligibleMatches)
         {
             Games = eligibleMatches.Count();
             if (Games == 0)
@@ -37,20 +37,19 @@ namespace Bracabot2.Domain.Games.Dota2
                 return;
             }
 
-
-            Victories = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)));
-            Defeats = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)));
+            Victories = eligibleMatches.Count(p => p.MatchResult == MatchResult.Win);
+            Defeats = eligibleMatches.Count(p => p.MatchResult == MatchResult.Lose);
             if (Victories + Defeats != Games)
             {
                 SetError("As contas do Renamede não estão corretas, avisa pra ele!");
                 return;
             }
 
-            SoloVictories = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            PartyVictories = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && p.RadiantWin) || (p.PlayerSlot >= 100 && !p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
+            SoloVictories = eligibleMatches.Count(p => p.MatchResult == MatchResult.Win && p.MatchType == MatchType.Ranked && p.PartySize == 1);
+            PartyVictories = eligibleMatches.Count(p => p.MatchResult == MatchResult.Win && p.MatchType == MatchType.Ranked && p.PartySize > 1);
 
-            SoloDefeats = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize == 1 && p.LobbyType == 7);
-            PartyDefeats = eligibleMatches.Count(p => ((p.PlayerSlot < 100 && !p.RadiantWin) || (p.PlayerSlot >= 100 && p.RadiantWin)) && p.PartySize > 1 && p.LobbyType == 7);
+            SoloDefeats = eligibleMatches.Count(p => p.MatchResult == MatchResult.Lose && p.MatchType == MatchType.Ranked && p.PartySize == 1);
+            PartyDefeats = eligibleMatches.Count(p => p.MatchResult == MatchResult.Lose && p.MatchType == MatchType.Ranked && p.PartySize == 1);
 
             Mmr = 30 * SoloVictories - 30 * SoloDefeats + 20 * PartyVictories - 20 * PartyDefeats;
 
