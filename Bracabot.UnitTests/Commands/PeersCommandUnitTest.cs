@@ -5,6 +5,7 @@ using Bracabot2.Domain.Support;
 using Microsoft.Extensions.Options;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -91,7 +92,7 @@ namespace Bracabot.UnitTests.Commands
                 {
                     GameId = Consts.Twitch.DOTA_2_ID
                 });
-            dotaService.Setup(s => s.GetPeersAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((DotaApiPeersResponse)null);
+            dotaService.Setup(s => s.GetPeersAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((IEnumerable<DotaApiPeersResponse>)null);
             var args = new string[] { "aa" };
             var peerCommand = new PeerCommand(dotaService.Object, twitchService.Object, options);
             
@@ -99,7 +100,41 @@ namespace Bracabot.UnitTests.Commands
             var result = await peerCommand.ExecuteAsync(args);
 
             // Assert
-            Assert.Equal("Não encontrei nenhum jogo com o identificador aa. Informe seu ID do dota ou nome da steam para visualizar sua estatísticas. Ex: !party [renamede] ou !party 420556150", result);
+            Assert.Equal("Não encontrei nenhum jogador com o identificador aa. Informe seu ID do dota ou nome da steam para visualizar sua estatísticas. Ex: !party [renamede] ou !party 420556150", result);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldReturnError_WhenMoreThanOnePeerIsFound()
+        {
+            // Arrange
+            twitchService.Setup(s => s.GetStreamInfo())
+                .ReturnsAsync(new TwitchApiStreamInfoNodeResponse
+                {
+                    GameId = Consts.Twitch.DOTA_2_ID
+                });
+            dotaService.Setup(s => s.GetPeersAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new[]{ new DotaApiPeersResponse
+                {
+                    Personaname = "Invoker de meteoro",
+                    WithGames = 3,
+                    WithWin = 2,
+                    LastPlayed = (int)new DateTimeOffset(2022, 11, 2, 15, 32, 25, TimeSpan.Zero).ToUnixTimeSeconds()
+                }, 
+                new DotaApiPeersResponse
+                {
+                    Personaname = "Riki de lotar",
+                    WithGames = 3,
+                    WithWin = 2,
+                    LastPlayed = (int)new DateTimeOffset(2022, 11, 2, 15, 32, 25, TimeSpan.Zero).ToUnixTimeSeconds()
+                }});
+            var args = new string[] { "aa" };
+            var peerCommand = new PeerCommand(dotaService.Object, twitchService.Object, options);
+
+            // Act
+            var result = await peerCommand.ExecuteAsync(args);
+
+            // Assert
+            Assert.Equal("Encontrei mais de um jogador com o identificador aa. Informe seu ID do dota para visualizar sua estatísticas. Ex: !party 420556150", result);
         }
 
         [Fact]
@@ -112,13 +147,13 @@ namespace Bracabot.UnitTests.Commands
                     GameId = Consts.Twitch.DOTA_2_ID
                 });
             dotaService.Setup(s => s.GetPeersAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(new DotaApiPeersResponse
+                .ReturnsAsync(new[]{ new DotaApiPeersResponse
                 {
                     Personaname = "Invoker de meteoro",
                     WithGames = 3,
                     WithWin = 2,
                     LastPlayed = (int)new DateTimeOffset(2022, 11, 2, 15, 32, 25, TimeSpan.Zero).ToUnixTimeSeconds()
-                });
+                } });
             var args = new string[] { "aa" };
             var peerCommand = new PeerCommand(dotaService.Object, twitchService.Object, options);
 
