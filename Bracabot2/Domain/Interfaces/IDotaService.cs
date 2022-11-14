@@ -13,7 +13,7 @@ namespace Bracabot2.Domain.Interfaces
         Task<string> GetMedalAsync(int medalId);
         Task<DotaApiMmrBucketResponse> GetMmrBucketAsync();
         Task<string> GetNameAsync(string heroId);
-        Task<DotaApiPeersResponse> GetPeersAsync(string dotaId, string accountId);
+        Task<IEnumerable<DotaApiPeersResponse>> GetPeersAsync(string dotaId, string accountId);
         Task<DotaApiPlayerResponse> GetPlayerAsync(string dotaId);
     }
 }

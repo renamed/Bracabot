@@ -88,7 +88,7 @@ namespace Bracabot2.Services
             });
         }
 
-        public async Task<DotaApiPeersResponse> GetPeersAsync(string dotaId, string accountId)
+        public async Task<IEnumerable<DotaApiPeersResponse>> GetPeersAsync(string dotaId, string accountId)
         {
             var peers = await cache.GetOrCreateAsync("DotaService.GetPeersAsync", async e =>
             {
@@ -100,17 +100,19 @@ namespace Bracabot2.Services
                 }
 
                 e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
-                return (peers.ToDictionary(k => k.AccountId.ToString()), peers.ToDictionary(k => k.Personaname, StringComparer.OrdinalIgnoreCase));
+                
+                return (peers.ToDictionary(k => k.AccountId.ToString())
+                        , peers);
             });
 
             if (peers == default)
                 return default;
 
             accountId = accountId.Trim();
-            DotaApiPeersResponse peer;
-            return peers.Item1.TryGetValue(accountId, out peer) || peers.Item2.TryGetValue(accountId, out peer)
-                ? peer
-                : null;
+            if (peers.Item1.TryGetValue(accountId, out var item))
+                return new[] { item };
+
+            return peers.Item2.Where(x => accountId.Equals(x.Personaname, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
         public Task<string> GetNameAsync(string heroId)

@@ -42,12 +42,18 @@ namespace Bracabot2.Commands
                 return "Informe seu ID do dota ou nome da steam para visualizar sua estatísticas. Ex: !party [renamede] ou !party 420556150";
             }
 
-            var peer = await dotaService.GetPeersAsync(dotaId, peerId);
-            if (peer == null)
+            var eligiblePeer = await dotaService.GetPeersAsync(dotaId, peerId);;
+            if (eligiblePeer == null || !eligiblePeer.Any())
             {
-                return $"Não encontrei nenhum jogo com o identificador {peerId}. Informe seu ID do dota ou nome da steam para visualizar sua estatísticas. Ex: !party [renamede] ou !party 420556150";
+                return $"Não encontrei nenhum jogador com o identificador {peerId}. Informe seu ID do dota ou nome da steam para visualizar sua estatísticas. Ex: !party [renamede] ou !party 420556150";
             }
 
+            if (eligiblePeer.Count() > 1)
+            {
+                return $"Encontrei mais de um jogador com o identificador {peerId}. Informe seu ID do dota para visualizar sua estatísticas. Ex: !party 420556150";
+            }
+
+            var peer = eligiblePeer.First();
             var lastPlayed = DateTimeOffset.FromUnixTimeSeconds(peer.LastPlayed);
             var lastPlayedBrasilia = TimeZoneInfo.ConvertTimeFromUtc(lastPlayed.DateTime, TimeZoneInfoExtension.GetBrasiliaTimeZone());
             return $"{peer.Personaname} jogou {peer.WithGames} vez(es) com {options.ChannelName}, com {peer.WithWin} vitória(s). Último jogo em {lastPlayedBrasilia:dd/MM/yyyy à\\s HH:mm:ss}. (Essas estatísticas podem não estar corretas se você desabilitou a opção de Exportar Dados da sua conta nas configurações do jogo de Dota 2.)";
