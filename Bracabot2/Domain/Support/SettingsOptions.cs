@@ -11,7 +11,7 @@ namespace Bracabot2.Domain.Support
         public string PortTwitchIrc { get; set; }
         public CaseInsensitiveDictionary<string> HeroesFromId { get; set; }
         public CaseInsensitiveDictionary<int> HeroesFromName { get; set; }
-        public Dictionary<int, string> Medals { get; set; }
+        public Dictionary<string, string> Medals { get; set; }
         public ApisOptions Apis { get; set; }
     }
 
