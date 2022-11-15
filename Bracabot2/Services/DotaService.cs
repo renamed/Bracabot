@@ -47,7 +47,7 @@ namespace Bracabot2.Services
                 if (matches == null)
                     e.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
                 else
-                    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+                    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(1);
                 return matches;
             });
         }
@@ -129,7 +129,7 @@ namespace Bracabot2.Services
 
         public Task<string> GetMedalAsync(int medalId)
         {
-            return Task.FromResult(!options.Medals.TryGetValue(medalId, out var medalName)
+            return Task.FromResult(!options.Medals.TryGetValue(medalId.ToString(), out var medalName)
                 ? null
                 : medalName.ToString());
         }
