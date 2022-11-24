@@ -90,7 +90,6 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             Assert.Equal(4, result.Games);
             Assert.Equal(2, result.Victories);
             Assert.Equal(2, result.Defeats);
-            Assert.Equal(30, result.Mmr);
             Assert.Equal(25, result.AvgK);
             Assert.Equal(35, result.AvgD);
             Assert.Equal(45, result.AvgA);
@@ -128,7 +127,6 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             Assert.Equal(2, result.Games);
             Assert.Equal(0, result.Victories);
             Assert.Equal(2, result.Defeats);
-            Assert.Equal(0, result.Mmr);
             Assert.Equal(15, result.AvgK);
             Assert.Equal(25, result.AvgD);
             Assert.Equal(35, result.AvgA);
@@ -166,7 +164,6 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             Assert.Equal(2, result.Games);
             Assert.Equal(2, result.Victories);
             Assert.Equal(0, result.Defeats);
-            Assert.Equal(0, result.Mmr);
             Assert.Equal(15, result.AvgK);
             Assert.Equal(25, result.AvgD);
             Assert.Equal(35, result.AvgA);
@@ -206,7 +203,6 @@ namespace Bracabot.UnitTests.Domain.Games.Dota2
             Assert.Equal(2, result.Games);
             Assert.Equal(2, result.Victories);
             Assert.Equal(0, result.Defeats);
-            Assert.Equal(40, result.Mmr);
             Assert.Equal(15, result.AvgK);
             Assert.Equal(25, result.AvgD);
             Assert.Equal(35, result.AvgA);

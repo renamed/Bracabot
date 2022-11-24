@@ -141,7 +141,7 @@ namespace Bracabot.UnitTests.Commands
             var result = await scoreCommand.ExecuteAsync(null);
 
             // Assert
-            Assert.Equal("J = 2 --- V -> 1 --- D -> 1 --- Saldo 0", result);
+            Assert.Equal("J = 2 --- V -> 1 --- D -> 1", result);
         }
     }
 }
