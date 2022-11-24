@@ -7,15 +7,7 @@ namespace Bracabot2.Domain.Games.Dota2
         public int Games { get; private set; }
         public int Victories { get; private set; }
         public int Defeats { get; private set; }
-
-        public int SoloVictories {get;private set;}
-        public int PartyVictories { get; private set; }
-
-        public int SoloDefeats {get; private set;}
-        public int PartyDefeats { get; private set;}
-
-        public int Mmr {get; private set;}
-
+        
         public int AvgK {get; private set;}
         public int AvgD {get; private set;}
         public int AvgA { get; private set; }
@@ -44,14 +36,6 @@ namespace Bracabot2.Domain.Games.Dota2
                 SetError("As contas do Renamede não estão corretas, avisa pra ele!");
                 return;
             }
-
-            SoloVictories = eligibleMatches.Count(p => p.MatchResult == MatchResult.Win && p.MatchType == MatchType.Ranked && p.PartySize == 1);
-            PartyVictories = eligibleMatches.Count(p => p.MatchResult == MatchResult.Win && p.MatchType == MatchType.Ranked && p.PartySize > 1);
-
-            SoloDefeats = eligibleMatches.Count(p => p.MatchResult == MatchResult.Lose && p.MatchType == MatchType.Ranked && p.PartySize == 1);
-            PartyDefeats = eligibleMatches.Count(p => p.MatchResult == MatchResult.Lose && p.MatchType == MatchType.Ranked && p.PartySize == 1);
-
-            Mmr = 30 * SoloVictories - 30 * SoloDefeats + 20 * PartyVictories - 20 * PartyDefeats;
 
             AvgK = eligibleMatches.Sum(x => x.Kills) / Games;
             AvgD = eligibleMatches.Sum(x => x.Deaths) / Games;

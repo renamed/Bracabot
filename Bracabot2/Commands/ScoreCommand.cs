@@ -47,11 +47,7 @@ namespace Bracabot2.Commands
                 return statistics.ErrorDescription;
             }
 
-            var sb = new StringBuilder();
-            sb.Append($"J = {statistics.Games} --- V -> {(statistics.Victories != 0 ? statistics.Victories.ToString() : "Nenhuma")} --- D -> {(statistics.Defeats != 0 ? statistics.Defeats.ToString() : "Nenhuma")} ");
-            sb.Append($"--- Saldo {statistics.Mmr:+#;-#;0}");
-
-            return sb.ToString();
+            return $"J = {statistics.Games} --- V -> {(statistics.Victories != 0 ? statistics.Victories.ToString() : "Nenhuma")} --- D -> {(statistics.Defeats != 0 ? statistics.Defeats.ToString() : "Nenhuma")}";                        
         }
     }
 }
